@@ -5,10 +5,18 @@ using System.Text;
 
 namespace Client {
 
+    public class Message {
+        public String text { get; set; }
+        public String[] texts { get; set; }
+
+        public int number { get; set; }
+        public int[] numbers { get; set; }
+    }
+
     class MainClass {
         public static void Main (string[] args) {
             	
-        	byte[] bytes = new byte[1024];  
+        	byte[] bytes = new byte[2048];
   
         	try {  
                 // Connect to a Remote server  
@@ -27,19 +35,29 @@ namespace Client {
                 try {  
                     // Connect to Remote EndPoint  
                     socket.Connect(remoteEP);
-
-                    // Encode the data string into a byte array.    
-                  //  byte[] msg = Encoding.ASCII.GetBytes("This is a test<EOF>");  
     
-                    // Send the data through the socket.    
-                  //  int bytesSent = sender.Send(msg);  
-    
+                
                     // Receive the response from the remote device.    
                     int bytesRec = socket.Receive(bytes);  
 
                     Console.WriteLine(bytesRec + " bytes");
                     Console.WriteLine("Echoed test = {0}",  
                         Encoding.ASCII.GetString(bytes, 0, bytesRec));
+
+
+                    //--------Response----------
+                    Message message = new Message();
+                    message.text = "Hellow the meaning of life is: ";
+                    message.number = 43;
+
+                    string jsonString = "{\"text\":"+message.text+",\"number\":"+message.number+"}";
+
+                    // Encode the data string into a byte array.    
+                    byte[] msg = Encoding.ASCII.GetBytes(jsonString);  
+    
+                    // Send the data through the socket.    
+                    int bytesSent = socket.Send(msg);  
+                    Console.WriteLine(bytesSent + " bytes sent");
 
                     // Release the socket.    
                     socket.Shutdown(SocketShutdown.Both);  

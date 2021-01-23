@@ -1,6 +1,6 @@
 #IDEA
 .idea/
-
+*.exe
 
 # Compiled class file
 *.class
