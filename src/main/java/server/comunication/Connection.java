@@ -1,20 +1,25 @@
 package server.comunication;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import static server.comunication.IDMessage.MESSAGE;
+
 @Data
+@NoArgsConstructor
 public class Connection {
 
-    private final Socket socket;
-    private final Sender sender;
-    private final Receiver receiver;
+    private Socket socket;
+    private Sender sender;
+    private Receiver receiver;
 
-    private Optional<Listener> chatListener, logbookListener, gameListener;
+    private Optional<Listener> chatListener, gameListener;
+
 
 
     public Connection(Socket socket) throws IOException {
@@ -25,7 +30,6 @@ public class Connection {
         // listener switcher
         receiver.setListener(Optional.of(m -> {
             switch (m.getIdMessage()) {
-                case LOGBOOK -> logbookListener.ifPresent(c -> c.action(m));
                 case MESSAGE -> chatListener.ifPresent(c -> c.action(m));
                 default -> gameListener.ifPresent(c -> c.action(m));
             }
@@ -45,6 +49,10 @@ public class Connection {
 
     public void sendMessage(IDMessage message){
         sender.send(new Message(message));
+    }
+
+    public void sendChatMessage(String message){
+        sender.send(new Message(message, MESSAGE));
     }
 
     /**

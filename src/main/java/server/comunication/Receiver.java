@@ -7,10 +7,14 @@ import server.RunnableThread;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
 * <h3>This class will be use to receive Messages</h3>
@@ -20,9 +24,12 @@ import java.util.function.Predicate;
 @Data
 public class Receiver extends RunnableThread {
 
+    public final static int MAX_RECEIVER_BUFFER = 1024;
+
     private Optional<Listener> listener;
     private final BufferedReader reader;
     private Predicate<Message> filter;
+    private  CharBuffer buffy;
     private Gson gson;
 
     /**
@@ -33,13 +40,22 @@ public class Receiver extends RunnableThread {
         filter = message -> false;
         reader = new BufferedReader(new InputStreamReader(socketRef.getInputStream(), StandardCharsets.UTF_8));
         gson = new Gson();
+        buffy = CharBuffer.allocate(MAX_RECEIVER_BUFFER);
     }
 
     @Override
     public void execute() {
         try {
-            Message message = gson.fromJson(reader.readLine(), Message.class);
-            if(listener != null && filter.test(message)) listener.action(message);
+
+            int bytes = reader.read(buffy);
+            String jsonMessage = new String(buffy.array(), 0, bytes);
+            buffy.clear();
+
+            System.out.println("Json received: " + jsonMessage);
+
+            Message message = gson.fromJson(jsonMessage, Message.class);
+            if(filter.test(message)) listener.ifPresent(l -> l.action(message));
+
         } catch (IOException e) {
             System.err.println("Reading interrupted");
             super.stopThread();

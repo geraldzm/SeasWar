@@ -1,51 +1,60 @@
 package server;
 
 
-import com.google.gson.Gson;
 import server.comunication.Connection;
 import server.comunication.IDMessage;
 import server.comunication.Message;
 
-import java.io.*;
-import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Scanner;
 
-import static server.comunication.IDMessage.ACCEPTED;
-import static server.comunication.IDMessage.ADMIN;
+import static server.comunication.IDMessage.*;
 
 public class Server extends RunnableThread{
 
-    ArrayList<Connection> connections;
+    ArrayList<Player> players;
 
     public Server() {
-        connections = connectPlayers();
+        players = connectPlayers();
+        //chat
+        players.forEach(p -> p.setChatListener(
+                Optional.of(m -> players.forEach(p2 -> p2.sendChatMessage(p.getName()+ m.getText())))
+        ));
+
+        //game listener
+        players.forEach(p -> p.setGameListener(
+                Optional.of(m -> System.out.println("Game instruction de " + p.getName()+ " : " + m))
+        ));
+
+
+    }
+
+    private String requestString(){
+        System.out.println("Digite un mensaje para enviar o 0 para terminar");
+        Scanner scanner = new Scanner(System.in);
+        return scanner.next();
     }
 
     @Override
     public void execute() {
-        Connection connection = connections.get(0);
 
-        connection.setChatListener(Optional.of(m -> System.out.println("Message chat: " + m)));
-        connection.setLogbookListener(Optional.of(m -> System.out.println("Message log: " +m)));
-        connection.setGameListener(Optional.of(m -> System.out.println("Game instruction: " + m)));
+        String message = requestString();
+        if(message.equals("0")) stopThread();
 
-        connection.sendMessage(new Message("Hola mundo!", ACCEPTED));
-
-        stopThread();
+        //send to all
+        players.forEach(p-> p.sendMessage(new Message(message, ACCEPTED)));
     }
 
     @Override
     public synchronized void stopThread() {
         super.stopThread();
-
     }
 
     /**
      * <h1>Connects all players</h1>
      * */
-    private ArrayList<Connection> connectPlayers() {
+    private ArrayList<Player> connectPlayers() {
 
         ServerConnection serverConnections = new ServerConnection();
         serverConnections.startThread();

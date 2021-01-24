@@ -1,7 +1,5 @@
 package server;
 
-import server.comunication.Connection;
-
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,7 +8,7 @@ import java.util.ArrayList;
 public class ServerConnection extends RunnableThread {
 
     private ServerSocket serverSocket;
-    private ArrayList<Connection> sockets;
+    private ArrayList<Player> sockets;
 
 
     public ServerConnection() {
@@ -29,7 +27,7 @@ public class ServerConnection extends RunnableThread {
 
             System.out.println("waiting connection with client...");
             Socket newClient  = serverSocket.accept();
-            sockets.add(new Connection(newClient));
+            sockets.add(new Player(newClient));
             System.out.println("One client connected!");
 
         } catch (IOException e) {
@@ -40,7 +38,7 @@ public class ServerConnection extends RunnableThread {
         stopThread();
     }
 
-    public ArrayList<Connection> getConnections() {
+    public ArrayList<Player> getConnections() {
         return sockets;
     }
 
