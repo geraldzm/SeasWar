@@ -4,21 +4,20 @@ using UnityEngine;
 
 public class Matrix : MonoBehaviour
 {
-    public int cols = 600;
+    public int cols = 30;
     public int rows = 20;
 
     public float tileSize = 1;
 
     public static GameObject[,] matrix;
-
-    private float started;
-    private const float delay = 1;
+    public static byte[,] byteMatrix;
 
     public Sprite[] spriteArray;
 
     void Start()
     {
         matrix = new GameObject[cols, rows];
+        byteMatrix = new byte[cols, rows];
 
         generateGrid();
 
@@ -28,32 +27,19 @@ public class Matrix : MonoBehaviour
 
         transform.position = new Vector2(-gridW / 2 + tileSize / 2, gridH / 2 - tileSize / 2);
 
-        started = Time.time;
-
         for (int row = 0; row < rows; row++)
             for (int col = 0; col < cols; col++)
             {
-
                 SpriteRenderer sprite = matrix[col, row].GetComponent<SpriteRenderer>();
+                byteMatrix[col, row] = 100;
 
                 sprite.sortingLayerName = "Objects";
-                sprite.sprite = spriteArray[0];
+                sprite.sprite = spriteArray[Random.Range(0, spriteArray.Length - 1)];
             }
     }
 
     void Update()
     {
-        if (started + delay - Time.time < 0)
-        {
-            started = Time.time;
-
-            int col = Random.Range(0, cols - 1);
-            int row = Random.Range(0, rows - 1);
-
-            SpriteRenderer sprite = matrix[col, row].GetComponent<SpriteRenderer>();
-
-            sprite.sprite = spriteArray[Random.Range(0, spriteArray.Length - 1)];
-        }
     }
 
     // Generamos la matriz de juego

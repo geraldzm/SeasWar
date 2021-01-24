@@ -26,16 +26,6 @@ public class Network : MonoBehaviour
 
         client.Connect();
 
-        Message message = new Message();
-
-        message.text = "Hola!";
-        message.idMessage = "ADMIN";
-        message.number = 5;
-
-        string testMsg = JsonConvert.SerializeObject(message);
-
-        client.Send(testMsg);
-
         // Inicializamos algunos componentes
         controller = GameObject.Find("UIEvents").GetComponent<UIController>();
     }
@@ -51,6 +41,7 @@ public class Network : MonoBehaviour
             {
                 case IDMessage.MESSAGE:
                     Debug.Log(Network.messageAvailable.text);
+                    controller.AddChatMessage(Network.messageAvailable.text);
                     break;
                 default:
                     Debug.Log("Mensaje no soportado: " + Network.messageAvailable.text);
