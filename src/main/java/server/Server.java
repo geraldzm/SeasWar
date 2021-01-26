@@ -1,8 +1,6 @@
 package server;
 
 
-import server.comunication.Connection;
-import server.comunication.IDMessage;
 import server.comunication.Message;
 
 import java.util.ArrayList;
@@ -13,27 +11,30 @@ import static server.comunication.IDMessage.*;
 
 public class Server extends RunnableThread{
 
-    ArrayList<Player> players;
+    ArrayList<Player> playersByID;
+
 
     public Server() {
-        players = connectPlayers();
+        playersByID = connectPlayers();
+
         //chat
-        players.forEach(p -> p.setChatListener(
-                Optional.of(m -> players.forEach(p2 -> p2.sendChatMessage(p.getName()+ m.getText())))
+        playersByID.forEach(p -> p.setChatListener(
+                Optional.of(m -> playersByID.forEach(p2 -> p2.sendChatMessage(p.getName()+ m.getText())))
         ));
 
         //game listener
-        players.forEach(p -> p.setGameListener(
+        playersByID.forEach(p -> p.setGameListener(
                 Optional.of(m -> System.out.println("Game instruction de " + p.getName()+ " : " + m))
         ));
-
 
     }
 
     private String requestString(){
         System.out.println("Digite un mensaje para enviar o 0 para terminar");
         Scanner scanner = new Scanner(System.in);
-        return scanner.next();
+        String ms = scanner.next();
+        scanner.close();
+        return ms;
     }
 
     @Override
@@ -43,7 +44,7 @@ public class Server extends RunnableThread{
         if(message.equals("0")) stopThread();
 
         //send to all
-        players.forEach(p-> p.sendMessage(new Message(message, ACCEPTED)));
+        playersByID.forEach(p-> p.sendMessage(new Message(message, ACCEPTED)));
     }
 
     @Override
@@ -65,7 +66,7 @@ public class Server extends RunnableThread{
             e.printStackTrace();
         }
 
-        return serverConnections.getConnections();
+        return serverConnections.getPlayers();
     }
 
 

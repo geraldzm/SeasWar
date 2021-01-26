@@ -24,11 +24,10 @@ import java.util.stream.Stream;
 @Data
 public class Receiver extends RunnableThread {
 
-    public final static int MAX_RECEIVER_BUFFER = 1024;
+    public final static int MAX_RECEIVER_BUFFER = 4096;
 
     private Optional<Listener> listener;
     private final BufferedReader reader;
-    private Predicate<Message> filter;
     private  CharBuffer buffy;
     private Gson gson;
 
@@ -37,7 +36,6 @@ public class Receiver extends RunnableThread {
      * */
     public Receiver(Socket socketRef) throws IOException {
         this.listener = Optional.empty();
-        filter = message -> false;
         reader = new BufferedReader(new InputStreamReader(socketRef.getInputStream(), StandardCharsets.UTF_8));
         gson = new Gson();
         buffy = CharBuffer.allocate(MAX_RECEIVER_BUFFER);
@@ -54,7 +52,7 @@ public class Receiver extends RunnableThread {
             System.out.println("Json received: " + jsonMessage);
 
             Message message = gson.fromJson(jsonMessage, Message.class);
-            if(filter.test(message)) listener.ifPresent(l -> l.action(message));
+            listener.ifPresent(l -> l.action(message));
 
         } catch (IOException e) {
             System.err.println("Reading interrupted");
@@ -65,7 +63,6 @@ public class Receiver extends RunnableThread {
     @Override
     public synchronized void stopThread() {
         super.stopThread();
-        setFilter(m -> false);
         try {
             reader.close();
         } catch (IOException e) {
@@ -73,10 +70,4 @@ public class Receiver extends RunnableThread {
         }
     }
 
-    /**
-     * <h3>The listener will receive any message read.</h3>
-     * */
-    public void removeFilter(){
-        filter = message -> true; // no filter
-    }
 }

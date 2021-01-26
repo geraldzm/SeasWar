@@ -2,6 +2,7 @@ package server.comunication;
 
 import lombok.Data;
 import lombok.ToString;
+import server.Player;
 
 @Data
 @ToString
@@ -11,8 +12,11 @@ public class Message {
     private String text;
     private String[] texts;
 
-    private int number;
-    private int[] numbers;
+    private Integer number;
+    private Integer[] numbers;
+
+    private Integer id;
+    private transient Player player;
 
     public Message(int number, String string, IDMessage idMessage) {
         this.number = number;
@@ -32,12 +36,12 @@ public class Message {
         this.idMessage = idMessage;
     }
 
-    public Message(int[] numbers, IDMessage idMessage) {
+    public Message(Integer[] numbers, IDMessage idMessage) {
         this.idMessage = idMessage;
         this.numbers = numbers;
     }
 
-    public Message( int[] numbers, String string, IDMessage idMessage) {
+    public Message(Integer[] numbers, String string, IDMessage idMessage) {
         this.idMessage = idMessage;
         this.text = string;
         this.numbers = numbers;
@@ -49,7 +53,4 @@ public class Message {
         this.numbers = null;
     }
 
-    public boolean isAllNull(){
-        return idMessage == null || text == null || texts == null || numbers == null;
-    }
 }

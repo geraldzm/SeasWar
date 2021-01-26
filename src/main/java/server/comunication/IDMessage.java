@@ -4,5 +4,12 @@ public enum IDMessage {
     ACCEPTED,
     ADMIN,
     LOGBOOK,
-    MESSAGE;
+    MESSAGE,
+    RESPONSE,
+    REJECTED,
+    REQUESTNAME,
+    WRONGNAME,
+    STARTED,
+    ID,
+    DONE;
 }
