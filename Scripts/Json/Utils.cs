@@ -16,6 +16,20 @@ public class Utils
                 return IDMessage.MESSAGE;
             case "LOGBOOK":
                 return IDMessage.LOGBOOK;
+            case "ACCEPTED":
+                return IDMessage.ACCEPTED;
+            case "RESPONSE":
+                return IDMessage.RESPONSE;
+            case "REJECTED":
+                return IDMessage.REJECTED;
+            case "REQUESTNAME":
+                return IDMessage.REQUESTNAME;
+            case "WRONGNAME":
+                return IDMessage.WRONGNAME;
+            case "STARTED":
+                return IDMessage.STARTED;
+            case "ID":
+                return IDMessage.ID;
             default:
                 return IDMessage.NONE;
         }

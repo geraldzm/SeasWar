@@ -21,6 +21,8 @@ public class FighterGenerator : MonoBehaviour
 
     private Dictionary<string, Fighter> warriors;
 
+    private Network network;
+
     void Start()
     {
         warriors = new Dictionary<string, Fighter>();
@@ -29,6 +31,7 @@ public class FighterGenerator : MonoBehaviour
         selectedContainer = GameObject.Find("SelectedContainer").GetComponent<Transform>();
         playButton = GameObject.Find("PlayButton").GetComponent<Button>();
         playerName = GameObject.Find("TextName").GetComponent<Text>();
+        network = GameObject.Find("Network").GetComponent<Network>();
 
 
         playButton.onClick.AddListener(delegate {
@@ -46,8 +49,21 @@ public class FighterGenerator : MonoBehaviour
 
     private void OnPlayButton()
     {
-        Debug.Log("Nombre del jugador: " + playerName.text);
-        // TODO: Conectar con el back
+        if (Network.lastMessage != IDMessage.WRONGNAME)
+        {
+            Network.name = playerName.text;
+
+            network.Connect();
+        } else
+        {
+            Message msgName = new Message
+            {
+                text = name,
+                idMessage = "RESPONSE" // TODO: Cambiar esto en utils
+            };
+
+            network.SendMessage(msgName);
+        }
     }
 
     // Aqui generamos los luchadores disponibles
@@ -114,7 +130,7 @@ public class FighterGenerator : MonoBehaviour
         Fighter fighterRef = new Fighter();
 
         fighterRef.name = name.text;
-        fighterRef.porc = FightersPorc[index];
+        fighterRef.percentage = FightersPorc[index];
         // TODO: Cambiar estos por uno de obtener libres
         fighterRef.power = values[0];
         fighterRef.res = values[0];

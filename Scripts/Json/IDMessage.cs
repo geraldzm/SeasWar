@@ -1,8 +1,16 @@
 ﻿public enum IDMessage
 {
-    DONE,
-    ADMIN,
+    ACCEPTED, 
+    ADMIN, 
+    LOGBOOK, 
     MESSAGE, 
-    LOGBOOK,
+    RESPONSE, 
+    REJECTED, 
+    REQUESTNAME,
+    WRONGNAME, 
+    STARTED, 
+    ID, 
+    DONE,
+    REQUESCHARACTERS,
     NONE
 }
