@@ -1,25 +1,27 @@
 ﻿using UnityEngine;
 using System;
+using System.Threading;
 using System.Text;
 using SimpleTcp;
 using Newtonsoft.Json;
 
-public class Network : MonoBehaviour
+public class Network
 {
-    public bool isConnected = false;
+    public static Network network;
+
+    public static bool isConnected = false;
 
     private static Message messageAvailable = null;
 
     private SimpleTcpClient client;
-    private UIController controller;
+    private static UIController controller;
 
     public static int PlayerID = -1;
     public static string name = "";
 
     public static IDMessage lastMessage = IDMessage.NONE;
 
-    // Inicializamos el socket
-    void Start()
+    private void Start()
     {
         // Inicializamos la conexion
         client = new SimpleTcpClient("127.0.0.1:42069");
@@ -29,16 +31,21 @@ public class Network : MonoBehaviour
         client.Events.Disconnected += Disconnected;
         client.Events.DataReceived += DataReceived;
 
-        // Inicializamos algunos componentes
-        if (GameObject.Find("UIEvents"))
-            controller = GameObject.Find("UIEvents").GetComponent<UIController>();
+        Thread listener = new Thread(new ThreadStart(Listener));
+
+        network.Connect();
+        listener.Start();
     }
 
-    void Update()
+    // Listener de mensajes
+    private void Listener()
     {
-        if (isConnected && Network.messageAvailable != null)
+        while (isConnected)
         {
-            OnMessageReceived();
+            if (messageAvailable != null)
+            {
+                OnMessageReceived();
+            }
         }
     }
 
@@ -47,6 +54,8 @@ public class Network : MonoBehaviour
         IDMessage id = Utils.getMessage(messageAvailable.idMessage);
 
         lastMessage = id;
+
+        Debug.Log(messageAvailable.idMessage + " : " + messageAvailable.text);
 
         switch (id)
         {
@@ -59,6 +68,7 @@ public class Network : MonoBehaviour
                 break;
             case IDMessage.REQUESTNAME:
                 Debug.Log("Respondiendo el nombre...");
+
                 Message msgName = new Message
                 {
                     text = name,
@@ -69,23 +79,34 @@ public class Network : MonoBehaviour
 
                 break;
             case IDMessage.REQUESCHARACTERS:
-                Debug.Log("");
+                Debug.Log("Enviando luchadores");
 
-                Message msgChar = new Message { 
-                    texts = { } // Serializar los personajes
+                // TODO: Mover a utils
+                string[] warriorText = new string[3];
+
+                for (int i = 0; i < 3; i++)
+                    warriorText[i] = JsonConvert.SerializeObject(FighterGenerator.GetFighters()[i]);
+
+                Message msgChar = new Message
+                {
+                    id = PlayerID,
+                    texts = warriorText,
+                    idMessage = "RESPONSE" // TODO: Cambiar esto en utils :D
                 };
+
+                SendMessage(msgChar);
 
                 break;
             case IDMessage.ID:
-                Debug.Log("ID del jugador");
                 PlayerID = messageAvailable.number;
+                Debug.Log("ID del jugador: " + PlayerID.ToString());
 
                 break;
             case IDMessage.ADMIN:
                 Debug.Log("Admin");
                 Message admin = new Message
                 {
-                    number = 2, // Cambiar esto a un combo box
+                    number = 2, // TODO: Cambiar esto a un combo box
                     idMessage = "RESPONSE"
                 };
 
@@ -98,11 +119,18 @@ public class Network : MonoBehaviour
                 Disconnect();
                 break;
             default:
-                Debug.Log("Mensaje no soportado: " + Network.messageAvailable.idMessage);
+                Debug.Log("Mensaje no soportado: " + messageAvailable.idMessage);
                 break;
         }
 
-        Network.messageAvailable = null;
+        messageAvailable = null;
+    }
+
+    public void SendMessage(Message message)
+    {
+        string json = JsonConvert.SerializeObject(message);
+
+        client.Send(json);
     }
 
     public void Disconnect()
@@ -137,13 +165,18 @@ public class Network : MonoBehaviour
 
         Debug.Log("Mensaje recibido");
 
-        Network.messageAvailable = message;
+        messageAvailable = message;
     }
 
-    public void SendMessage(Message message)
+    public static Network getInstance()
     {
-        string json = JsonConvert.SerializeObject(message);
+        if (network == null)
+        {
+            network = new Network();
 
-        client.Send(json);
+            network.Start();
+        }
+
+        return network;
     }
 }

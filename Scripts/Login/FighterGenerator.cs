@@ -3,11 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+using Newtonsoft.Json;
+
 public class FighterGenerator : MonoBehaviour
 {
     public Sprite[] FightersImage;
-    public string[] FightersName;
+
     public string[] FightersAttacks;
+    public string[] FightersAttacksEnums;
+    public static string[] FightersName = new string[] { 
+        "Manta negra", "Poseidon", "Aquaman", "Jack Sparrow", "Davy Jones"
+    };
+
     public int[] FightersPorc;
 
     private int amountFighters;
@@ -19,19 +26,18 @@ public class FighterGenerator : MonoBehaviour
     private Button playButton;
     private Text playerName;
 
-    private Dictionary<string, Fighter> warriors;
-
-    private Network network;
+    public static Dictionary<string, Fighter> warriors = new Dictionary<string, Fighter>();
 
     void Start()
     {
-        warriors = new Dictionary<string, Fighter>();
+        FightersAttacksEnums = new string[] {
+            "THUNDERS", "TELEPATHY", "KRAKEN", "WAVES", "TRIDENT", "VOLCANO"
+        };
 
         availableContainer = GameObject.Find("AvailableContent").GetComponent<Transform>();
         selectedContainer = GameObject.Find("SelectedContainer").GetComponent<Transform>();
         playButton = GameObject.Find("PlayButton").GetComponent<Button>();
         playerName = GameObject.Find("TextName").GetComponent<Text>();
-        network = GameObject.Find("Network").GetComponent<Network>();
 
 
         playButton.onClick.AddListener(delegate {
@@ -53,7 +59,7 @@ public class FighterGenerator : MonoBehaviour
         {
             Network.name = playerName.text;
 
-            network.Connect();
+            Network.getInstance().Connect();
         } else
         {
             Message msgName = new Message
@@ -62,7 +68,7 @@ public class FighterGenerator : MonoBehaviour
                 idMessage = "RESPONSE" // TODO: Cambiar esto en utils
             };
 
-            network.SendMessage(msgName);
+            Network.getInstance().SendMessage(msgName);
         }
     }
 
@@ -130,12 +136,13 @@ public class FighterGenerator : MonoBehaviour
         Fighter fighterRef = new Fighter();
 
         fighterRef.name = name.text;
-        fighterRef.percentage = FightersPorc[index];
+        fighterRef.per = FightersPorc[index];
+
         // TODO: Cambiar estos por uno de obtener libres
         fighterRef.power = values[0];
         fighterRef.res = values[0];
         fighterRef.health = values[0];
-        fighterRef.attack = FightersAttacks[0];
+        fighterRef.attacks = new string[] { FightersAttacksEnums[0] };
 
         dpPower.onValueChanged.AddListener(delegate {
             fighterRef.power = values[dpPower.value];
@@ -150,9 +157,25 @@ public class FighterGenerator : MonoBehaviour
         });
 
         dpAttack.onValueChanged.AddListener(delegate {
-            fighterRef.attack = FightersAttacks[dpAttack.value];
+            fighterRef.attacks[0] = FightersAttacksEnums[dpAttack.value];
         });
 
         warriors.Add(name.text, fighterRef);
+    }
+
+    public static Fighter[] GetFighters()
+    {
+        Fighter[] playerFighters = new Fighter[3];
+
+        int count = 0;
+
+        for (int i = 0; i < FightersName.Length; i++) 
+            if (warriors.ContainsKey(FightersName[i]))
+            {
+                playerFighters[count] = warriors[FightersName[i]];
+                count++;
+            }
+
+        return playerFighters;
     }
 }
