@@ -110,7 +110,7 @@ public class Connection {
     }
 
     public void removeListener(){
-        receiver.setListener(Optional.empty());
+        gameListener  = Optional.empty();
     }
 
 

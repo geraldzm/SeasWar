@@ -25,9 +25,9 @@ public class ActionQueue {
 
     private HashSet<Integer> ready;
     private final Listener listener = m -> {
-        action.ifPresent(ls -> ls.action(m));
         synchronized (lock){
             done++;
+            action.ifPresent(ls -> ls.action(m));
             if(m.getId() != null) ready.add(m.getId());
             lock.notify();
         }
@@ -88,7 +88,7 @@ public class ActionQueue {
                 connection.setFilter(filter); // set filter before sending the message
                 Message message = messages.get(i);
                 message.setPlayer((Player) connection);
-                connection.sendMessage(message);
+                connection.sendMessageAndWait(message);
 
              //   LogMessageFactory.sendLogBookMessage(message);// bitacora
             }
@@ -108,7 +108,10 @@ public class ActionQueue {
             action = Optional.empty();
         }
 
-        recipients.forEach(c -> c.setGameListener(Optional.empty()));
+        recipients.forEach(c -> {
+            if(c.getGameListener().isPresent() && c.getGameListener().get() == listener)
+                c.setGameListener(Optional.empty());
+        });
     }
 
     public void executeQueue() {
