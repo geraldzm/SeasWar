@@ -4,6 +4,7 @@ import lombok.Getter;
 import server.comunication.Listener;
 import server.comunication.Message;
 import server.model.Player;
+import server.model.Village;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -39,13 +40,14 @@ public class ServerConnection extends RunnableThread {
 
     @Override
     public void execute() {
-        if(connected) configs();
-        else connecting();
+        if(!connected) connecting();
     }
 
     // config champions
     private void configs() {
+        System.out.println("entra a configs");
 
+        // champions
         Listener championsListener = m -> {
            // players.get(m.getId());
             System.out.println("Name: " + players.get(m.getId()) + " Json champion: " + m.getText());
@@ -54,6 +56,15 @@ public class ServerConnection extends RunnableThread {
         ActionQueue actionQueue = new ActionQueue(new ArrayList<>(players));
         actionQueue.addAction(new Message(REQUESTCHARACTERS), championsListener, RESPONSE);
         actionQueue.executeQueue();
+
+   /*     // create villages
+        players.forEach(p -> {
+            Village village = new Village();
+            village.initVillage(p.getChampions()); // create matrix
+            p.setVillage(village);
+        });
+
+*/
 
         initGame();
     }
@@ -75,15 +86,20 @@ public class ServerConnection extends RunnableThread {
                 admin = player;
 
                 Listener adminListener = m ->{
+                    System.out.println("Admin responde con: " + m.toString());
                     maxPlayers = m.getNumber();
                     requestName(admin);
                 };
 
                 admin.sendMessageAndWait(admin.getId(), ID); // send id
 
+                System.out.println("ID: ");
+
                 admin.setGameListener(Optional.of(adminListener));
                 admin.setFilter(Optional.of(m -> m.getIdMessage() == RESPONSE));
                 admin.sendMessage(ADMIN);
+
+                System.out.println("ADMIN");
 
             } else if(players.size() < maxPlayers) {
 
@@ -91,6 +107,10 @@ public class ServerConnection extends RunnableThread {
 
                 players.add(player);
                 player.sendMessage(ACCEPTED);
+                if(players.size() == maxPlayers){
+                    connected = true;
+                    System.out.println("Ya se conectaront todos los que tenian queser");
+                }
                 requestName(player);
 
             } else {
@@ -106,14 +126,18 @@ public class ServerConnection extends RunnableThread {
     }
 
     private void requestName(Player player) {
+        System.out.println("Se le pide el nombre al player: " + player.getId());
 
         Listener nameListener = message -> {
+            System.out.println("Me responden el nombre con: " + message.getText());
             if(players.stream().map(Player::getName).filter(Objects::nonNull).anyMatch(s -> s.equals(message.getText()))){ // if the name already exists
                 player.sendMessage(WRONGNAME);
             }else {
                 player.removeListener();
                 player.setName(message.getText());
-                if(players.size() == maxPlayers && players.stream().noneMatch(p -> p.getName() == null)) connected = true; // if all players really then start
+                if(players.size() == maxPlayers) {
+                    configs();
+                } // if all players really then start
             }
         };
 

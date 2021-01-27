@@ -1,6 +1,7 @@
 package server;
 
 
+import com.google.gson.Gson;
 import server.comunication.Message;
 import server.model.Box;
 import server.model.Champion;
@@ -32,28 +33,12 @@ public class Server extends RunnableThread{
 
     }
 
-    private String requestString(){
-        System.out.println("Digite un mensaje para enviar o 0 para terminar");
-        Scanner scanner = new Scanner(System.in);
-        String ms = scanner.next();
-        scanner.close();
-        return ms;
-    }
-
     @Override
     public void execute() {
 
-        String message = requestString();
-        if(message.equals("0")) stopThread();
-
-        //send to all
-        playersByID.forEach(p-> p.sendMessage(new Message(message, ACCEPTED)));
+        stopThread();
     }
 
-    @Override
-    public synchronized void stopThread() {
-        super.stopThread();
-    }
 
     /**
      * <h1>Connects all players</h1>
@@ -69,6 +54,7 @@ public class Server extends RunnableThread{
             e.printStackTrace();
         }
 
+        System.out.println("Comienza el server");
         return serverConnections.getPlayers();
     }
 
@@ -76,8 +62,8 @@ public class Server extends RunnableThread{
     public static void main(String[] args) {
         new Server().startThread();
 
-
 /*
+
         Champion c1 = new Champion();
         c1.setPercentage(45);
         c1.setName("c1");
@@ -107,6 +93,8 @@ public class Server extends RunnableThread{
 
         System.out.println("\nAppearance: ");
         count.forEach((s, atomicInteger) -> System.out.println(s + " " +atomicInteger.get() + " times"));
+
+        System.out.println(new Gson().toJson(village.getMatrix()));
 */
     }
 

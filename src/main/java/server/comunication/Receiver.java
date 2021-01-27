@@ -46,9 +46,12 @@ public class Receiver extends RunnableThread {
     public void execute() {
         try {
 
+            System.out.println("esperando input");
             int bytes = reader.read(buffy);
 
-            if(bytes != -1) return; // didn't read
+            System.out.println("Llegan : " + bytes +" bytes");
+
+            if(bytes == -1) return; // didn't read
 
             String jsonMessage = new String(buffy.array(), 0, bytes);
             buffy.clear();

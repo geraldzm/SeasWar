@@ -34,7 +34,7 @@ public class Village {
             for (int column = 0; column < COLUMNS; column++) {
 
                 Champion owner = assignToRandomChampion(championIntegerMap);
-                matrix[row][column] = new Box((byte) 100, owner);
+                matrix[row][column] = new Box((byte) 100, owner.getName(), owner);
 
             }
     }
