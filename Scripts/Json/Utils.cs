@@ -30,6 +30,8 @@ public class Utils
                 return IDMessage.STARTED;
             case "ID":
                 return IDMessage.ID;
+            case "REQUESTCHARACTERS":
+                return IDMessage.REQUESTCHARACTERS;
             default:
                 return IDMessage.NONE;
         }

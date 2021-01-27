@@ -11,6 +11,6 @@
     STARTED, 
     ID, 
     DONE,
-    REQUESCHARACTERS,
+    REQUESTCHARACTERS,
     NONE
 }

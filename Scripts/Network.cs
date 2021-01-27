@@ -16,7 +16,6 @@ public class Network
 
     private static Message messageAvailable = null;
 
-    private SimpleTcpClient client;
     private static UIController controller;
 
     public static int PlayerID = -1;
@@ -36,10 +35,6 @@ public class Network
     {
         try
         {
-            // Connect to a Remote server  
-            // Get Host IP Address that is used to establish a connection  
-            // In this case, we get one IP address of localhost that is IP : 127.0.0.1  
-            // If a host has multiple addresses, you will get a list of addresses  
             ipAddress = host.AddressList[0];
             remoteEP = new IPEndPoint(ipAddress, 42069);
 
@@ -80,25 +75,6 @@ public class Network
         {
             Debug.Log(e.ToString());
         }
-
-        /*// Inicializamos la conexion
-        client = new SimpleTcpClient("127.0.0.1:42069");
-
-        // set events
-        client.Events.Connected += Connected;
-        client.Events.Disconnected += Disconnected;
-        client.Events.DataReceived += DataReceived;
-
-        Thread listener = new Thread(new ThreadStart(Listener));
-
-        network.Connect();
-        listener.Start();
-
-        Message admin = new Message
-        {
-            number = 2, // TODO: Cambiar esto a un combo box
-            idMessage = "RESPONSE"
-        };*/
     }
 
     // Listener de mensajes
@@ -139,28 +115,47 @@ public class Network
 
         Debug.Log(messageAvailable.idMessage + " : " + messageAvailable.text);
 
+        Message message;
+
         switch (id)
         {
             case IDMessage.MESSAGE:
                 controller.AddChatMessage(messageAvailable.text);
                 break;
+            case IDMessage.ACCEPTED:
+                message = new Message
+                {
+                    idMessage = "DONE"
+                };
+
+                SendMessage(message);
+
+                break;
             case IDMessage.STARTED:
                 // TODO: El mero desvergue de cambiar de scene
                 Debug.Log("El juego puede iniciar!");
+
+                message = new Message
+                {
+                    idMessage = "DONE"
+                };
+
+                SendMessage(message);
+
                 break;
             case IDMessage.REQUESTNAME:
                 Debug.Log("Respondiendo el nombre...");
 
-                Message msgName = new Message
+                message = new Message
                 {
                     text = name,
                     idMessage = "RESPONSE" // TODO: Cambiar esto en utils
                 };
 
-                SendMessage(msgName);
+                SendMessage(message);
 
                 break;
-            case IDMessage.REQUESCHARACTERS:
+            case IDMessage.REQUESTCHARACTERS:
                 Debug.Log("Enviando luchadores");
 
                 // TODO: Mover a utils
@@ -169,19 +164,26 @@ public class Network
                 for (int i = 0; i < 3; i++)
                     warriorText[i] = JsonConvert.SerializeObject(FighterGenerator.GetFighters()[i]);
 
-                Message msgChar = new Message
+                message = new Message
                 {
                     id = PlayerID,
                     texts = warriorText,
                     idMessage = "RESPONSE" // TODO: Cambiar esto en utils :D
                 };
 
-                SendMessage(msgChar);
+                SendMessage(message);
 
                 break;
             case IDMessage.ID:
                 PlayerID = messageAvailable.number;
                 Debug.Log("ID del jugador: " + PlayerID.ToString());
+
+                message = new Message
+                {
+                    idMessage = "DONE"
+                };
+
+                SendMessage(message);
 
                 break;
             case IDMessage.ADMIN:
@@ -202,6 +204,14 @@ public class Network
                 break;
             default:
                 Debug.Log("Mensaje no soportado: " + messageAvailable.idMessage);
+
+                message = new Message
+                {
+                    idMessage = "DONE"
+                };
+
+                SendMessage(message);
+
                 break;
         }
 
@@ -213,8 +223,6 @@ public class Network
         string json = JsonConvert.SerializeObject(message);
 
         sender.Send(Encoding.UTF8.GetBytes(json));
-
-        Array.Clear(buffer, 0, buffer.Length);
     }
 
     public void Disconnect()
