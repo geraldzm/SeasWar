@@ -46,7 +46,7 @@ public class Connection {
 
     public void sendMessage(Message message){
         try {
-            if(sender.getThread() != null)sender.getThread().join();
+            if(sender.getThread() != null && sender.getThread().isAlive())sender.getThread().join();
             sender.send(message);
         } catch (InterruptedException e) {
             e.printStackTrace();

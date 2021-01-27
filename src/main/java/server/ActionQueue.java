@@ -21,11 +21,11 @@ public class ActionQueue {
     private final Object lock = new Object();
     private int done;
 
-    private Listener action;
+    private Optional<Listener> action;
 
     private HashSet<Integer> ready;
     private final Listener listener = m -> {
-        if(action != null) action.action(m);
+        action.ifPresent(ls -> ls.action(m));
         synchronized (lock){
             done++;
             if(m.getId() != null) ready.add(m.getId());
@@ -46,16 +46,19 @@ public class ActionQueue {
         this(new ArrayList<>(recipients.values()));
     }
 
-    public void addAction(Message message){
+    public ActionQueue addAction(Message message){
         addAction(message, null, DONE);
+        return this;
     }
 
-    public void addAction(Message message, Listener action){
+    public ActionQueue addAction(Message message, Listener action){
         addAction(message, action, RESPONSE);
+        return this;
     }
 
-    public void addAction(Message message, Listener action, IDMessage filter){
+    public ActionQueue addAction(Message message, Listener action, IDMessage filter){
         addAction(new ArrayList<>(Collections.nCopies(recipients.size(), message)), action, filter);
+        return this;
     }
 
     /**
@@ -74,13 +77,14 @@ public class ActionQueue {
             done = 0;
 
             // POPS
-            action = actionsQueue.poll().orElse(null);
+            action = actionsQueue.poll();
             ArrayList<Message> messages = queueMessages.poll().orElse(null);
-            Optional<Predicate<Message>> filter = Optional.of(filters.poll().orElse(message -> true).and(m ->!ready.contains(m.getId())));
+            Optional<Predicate<Message>> filter = Optional.of(filters.poll().orElse(message -> true).and(m -> !ready.contains(m.getId())));
 
             // SEND
             for (int i = 0; i < recipients.size(); i++) {
                 Connection connection = recipients.get(i);
+                connection.setGameListener(Optional.of(listener));
                 connection.setFilter(filter); // set filter before sending the message
                 Message message = messages.get(i);
                 message.setPlayer((Player) connection);
@@ -99,16 +103,15 @@ public class ActionQueue {
                 e.printStackTrace();
             }
 
+            // clean
+            ready.clear();
+            action = Optional.empty();
         }
 
-        // clean
-        ready.clear();
         recipients.forEach(c -> c.setGameListener(Optional.empty()));
-        action = null;
     }
 
     public void executeQueue() {
-        recipients.forEach(c -> c.setGameListener(Optional.of(listener)));
         execute();
     }
 

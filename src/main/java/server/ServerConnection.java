@@ -7,11 +7,10 @@ import server.model.Player;
 import server.model.Village;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static server.comunication.IDMessage.*;
 
@@ -79,6 +78,9 @@ public class ServerConnection extends RunnableThread {
             Player player = new Player(newClient);
             player.setId(players.size());
 
+            ActionQueue quickQueue = new ActionQueue(Collections.singletonList(player));
+            quickQueue.addAction(new Message(player.getId(), ID));
+
             if (players.size() == 0) { // the first client is the admin
                 players.add(player);
 
@@ -91,33 +93,28 @@ public class ServerConnection extends RunnableThread {
                     requestName(admin);
                 };
 
-                admin.sendMessageAndWait(admin.getId(), ID); // send id
-
-                System.out.println("ID: ");
-
-                admin.setGameListener(Optional.of(adminListener));
-                admin.setFilter(Optional.of(m -> m.getIdMessage() == RESPONSE));
-                admin.sendMessage(ADMIN);
-
-                System.out.println("ADMIN");
+                quickQueue.addAction(new Message(ADMIN), adminListener, RESPONSE);
 
             } else if(players.size() < maxPlayers) {
 
-                player.sendMessageAndWait(admin.getId(), ID); // send id
-
                 players.add(player);
-                player.sendMessage(ACCEPTED);
-                if(players.size() == maxPlayers){
+
+                quickQueue.addAction(new Message(ACCEPTED), message -> requestName(player), DONE);
+
+                if(players.size() == maxPlayers) {
                     connected = true;
                     System.out.println("Ya se conectaront todos los que tenian queser");
                 }
-                requestName(player);
 
             } else {
                 // lo rechazamos
                 player.sendMessageAndWait(REJECTED);
                 player.closeConnection();
+                return;
             }
+
+            quickQueue.executeQueue();
+            System.out.println("Termina la cola");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -131,7 +128,7 @@ public class ServerConnection extends RunnableThread {
         Listener nameListener = message -> {
             System.out.println("Me responden el nombre con: " + message.getText());
             if(players.stream().map(Player::getName).filter(Objects::nonNull).anyMatch(s -> s.equals(message.getText()))){ // if the name already exists
-                player.sendMessage(WRONGNAME);
+                player.sendMessageAndWait(WRONGNAME);
             }else {
                 player.removeListener();
                 player.setName(message.getText());
@@ -144,7 +141,7 @@ public class ServerConnection extends RunnableThread {
         player.setGameListener(Optional.of(nameListener));
         player.setFilter(Optional.of(ms -> ms.getIdMessage() == RESPONSE));
 
-        player.sendMessage(REQUESTNAME);
+        player.sendMessageAndWait(REQUESTNAME);
     }
 
 

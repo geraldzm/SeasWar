@@ -41,12 +41,19 @@ public class Sender extends RunnableThread {
         }finally {
             toSend = null;
             stopThread();
+
         }
     }
 
     public void send(Message message) {
         if(message == null) return;
         toSend = gson.toJson(message);
+
+        if(toSend == null) {
+            System.out.println("Se genero un Json nulo con: ");
+            System.out.println(message.toString());
+        }
+
         this.startThread();
     }
 

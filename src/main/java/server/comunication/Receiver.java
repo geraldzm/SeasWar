@@ -46,7 +46,6 @@ public class Receiver extends RunnableThread {
     public void execute() {
         try {
 
-            System.out.println("esperando input");
             int bytes = reader.read(buffy);
 
             System.out.println("Llegan : " + bytes +" bytes");
