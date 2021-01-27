@@ -4,10 +4,8 @@ import lombok.Getter;
 import server.comunication.Listener;
 import server.comunication.Message;
 import server.model.Player;
-import server.model.Village;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
@@ -21,7 +19,7 @@ public class ServerConnection extends RunnableThread {
     private ArrayList<Player> players;
     private Player admin;
     private int maxPlayers;
-    private boolean connected;
+    private boolean connected, configurations;
 
     public ServerConnection() {
         try {
@@ -40,6 +38,7 @@ public class ServerConnection extends RunnableThread {
     @Override
     public void execute() {
         if(!connected) connecting();
+        else if (configurations) configs();
     }
 
     // config champions
@@ -48,13 +47,13 @@ public class ServerConnection extends RunnableThread {
 
         // champions
         Listener championsListener = m -> {
-           // players.get(m.getId());
-            System.out.println("Name: " + players.get(m.getId()) + " Json champion: " + m.getText());
+            System.out.println("Llegan los campeones de: " + players.get(m.getId()).getName() + " Json champion: " + Arrays.toString(m.getTexts()));
         };
 
-        ActionQueue actionQueue = new ActionQueue(new ArrayList<>(players));
-        actionQueue.addAction(new Message(REQUESTCHARACTERS), championsListener, RESPONSE);
-        actionQueue.executeQueue();
+        new ActionQueue(new ArrayList<>(players))
+                .addAction(new Message(REQUESTCHARACTERS), championsListener, RESPONSE)
+                .executeQueue();
+
 
    /*     // create villages
         players.forEach(p -> {
@@ -65,7 +64,8 @@ public class ServerConnection extends RunnableThread {
 
 */
 
-        initGame();
+        stopThread();
+        //   initGame();
     }
 
     private void connecting() {
@@ -88,7 +88,6 @@ public class ServerConnection extends RunnableThread {
                 admin = player;
 
                 Listener adminListener = m ->{
-                    System.out.println("Admin responde con: " + m.toString());
                     maxPlayers = m.getNumber();
                     requestName(admin);
                 };
@@ -103,7 +102,6 @@ public class ServerConnection extends RunnableThread {
 
                 if(players.size() == maxPlayers) {
                     connected = true;
-                    System.out.println("Ya se conectaront todos los que tenian queser");
                 }
 
             } else {
@@ -114,7 +112,6 @@ public class ServerConnection extends RunnableThread {
             }
 
             quickQueue.executeQueue();
-            System.out.println("Termina la cola");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -123,18 +120,14 @@ public class ServerConnection extends RunnableThread {
     }
 
     private void requestName(Player player) {
-        System.out.println("Se le pide el nombre al player: " + player.getId());
 
         Listener nameListener = message -> {
-            System.out.println("Me responden el nombre con: " + message.getText());
             if(players.stream().map(Player::getName).filter(Objects::nonNull).anyMatch(s -> s.equals(message.getText()))){ // if the name already exists
                 player.sendMessageAndWait(WRONGNAME);
             }else {
                 player.removeListener();
                 player.setName(message.getText());
-                if(players.size() == maxPlayers) {
-                    configs();
-                } // if all players really then start
+                if(players.size() == maxPlayers) configurations = true; //activate configurations
             }
         };
 
