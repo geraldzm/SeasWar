@@ -5,6 +5,9 @@ using System.Text;
 using SimpleTcp;
 using Newtonsoft.Json;
 
+using System.Net;
+using System.Net.Sockets;
+
 public class Network
 {
     public static Network network;
@@ -21,9 +24,64 @@ public class Network
 
     public static IDMessage lastMessage = IDMessage.NONE;
 
+    public IPHostEntry host = Dns.GetHostEntry("localhost");
+    public IPAddress ipAddress;
+    public IPEndPoint remoteEP;
+
+    private Socket sender;
+
+    private byte[] buffer = new byte[4096];
+
     private void Start()
     {
-        // Inicializamos la conexion
+        try
+        {
+            // Connect to a Remote server  
+            // Get Host IP Address that is used to establish a connection  
+            // In this case, we get one IP address of localhost that is IP : 127.0.0.1  
+            // If a host has multiple addresses, you will get a list of addresses  
+            ipAddress = host.AddressList[0];
+            remoteEP = new IPEndPoint(ipAddress, 42069);
+
+            // Create a TCP/IP  socket.    
+            sender = new Socket(ipAddress.AddressFamily,
+                SocketType.Stream, ProtocolType.Tcp);
+
+            // Connect the socket to the remote endpoint. Catch any errors.    
+            try
+            {
+                // Connect to Remote EndPoint  
+                sender.Connect(remoteEP);
+
+                Debug.Log("Socket connected to " + sender.RemoteEndPoint.ToString());
+
+                isConnected = true;
+
+                Thread listener = new Thread(new ThreadStart(Listener));
+
+                listener.Start();
+
+            }
+            catch (ArgumentNullException ane)
+            {
+                Debug.Log("ArgumentNullException :" +  ane.ToString());
+            }
+            catch (SocketException se)
+            {
+                Debug.Log("SocketException :" + se.ToString());
+            }
+            catch (Exception e)
+            {
+                Debug.Log("Unexpected exception :" + e.ToString());
+            }
+
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e.ToString());
+        }
+
+        /*// Inicializamos la conexion
         client = new SimpleTcpClient("127.0.0.1:42069");
 
         // set events
@@ -35,6 +93,12 @@ public class Network
 
         network.Connect();
         listener.Start();
+
+        Message admin = new Message
+        {
+            number = 2, // TODO: Cambiar esto a un combo box
+            idMessage = "RESPONSE"
+        };*/
     }
 
     // Listener de mensajes
@@ -42,6 +106,24 @@ public class Network
     {
         while (isConnected)
         {
+            Array.Clear(buffer, 0, buffer.Length);
+
+            Debug.Log("Antes de: " + Encoding.UTF8.GetString(buffer));
+
+            int bytes = sender.Receive(buffer);
+
+            if (bytes <= 0) continue;
+
+            Debug.Log("Cantidad de bytes: " + bytes.ToString());
+
+            string received = Encoding.UTF8.GetString(buffer);
+
+            Debug.Log("JSON: " + received);
+
+            Message message = JsonConvert.DeserializeObject<Message>(received);
+
+            messageAvailable = message;
+
             if (messageAvailable != null)
             {
                 OnMessageReceived();
@@ -130,19 +212,21 @@ public class Network
     {
         string json = JsonConvert.SerializeObject(message);
 
-        client.Send(json);
+        sender.Send(Encoding.UTF8.GetBytes(json));
+
+        Array.Clear(buffer, 0, buffer.Length);
     }
 
     public void Disconnect()
     {
-        client.Disconnect();
+        sender.Close();
 
         isConnected = false;
     }
 
     public void Connect()
     {
-        client.Connect();
+        //client.Connect();
 
         isConnected = true;
     }
@@ -154,7 +238,7 @@ public class Network
 
     static void Disconnected(object sender, EventArgs e)
     {
-        Debug.Log("*** Server disconnected");
+        Debug.Log("*** Server disconnected" + e.ToString());
     }
 
     static void DataReceived(object sender, DataReceivedEventArgs e)
