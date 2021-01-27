@@ -2,10 +2,13 @@ package server;
 
 
 import server.comunication.Message;
+import server.model.Box;
+import server.model.Champion;
+import server.model.Player;
+import server.model.Village;
 
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static server.comunication.IDMessage.*;
 
@@ -72,6 +75,41 @@ public class Server extends RunnableThread{
 
     public static void main(String[] args) {
         new Server().startThread();
+
+
+/*
+        Champion c1 = new Champion();
+        c1.setPercentage(45);
+        c1.setName("c1");
+        Champion c2 = new Champion();
+        c2.setPercentage(25);
+        c2.setName("c2");
+        Champion c3 = new Champion();
+        c3.setPercentage(30);
+        c3.setName("c3");
+
+        Village village = new Village();
+        village.initVillage(new ArrayList<Champion>(Arrays.asList(c1, c2, c3)));
+        Box[][] matrix = village.getMatrix();
+
+        Hashtable<String, AtomicInteger> count = new Hashtable<>();
+
+        for (int row = 0; row < 20; row++) {
+            System.out.println("");
+            for (int column = 0; column < 30; column++) {
+                String name = matrix[row][column].getOwner().getName();
+                System.out.print(String.format("[%s]\t", name));
+
+                count.putIfAbsent(name, new AtomicInteger(0));
+                count.get(name).incrementAndGet();
+            }
+        }
+
+        System.out.println("\nAppearance: ");
+        count.forEach((s, atomicInteger) -> System.out.println(s + " " +atomicInteger.get() + " times"));
+*/
     }
+
+
 
 }

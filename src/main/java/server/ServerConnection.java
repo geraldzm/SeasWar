@@ -3,11 +3,13 @@ package server;
 import lombok.Getter;
 import server.comunication.Listener;
 import server.comunication.Message;
+import server.model.Player;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Optional;
 
 import static server.comunication.IDMessage.*;
@@ -19,6 +21,7 @@ public class ServerConnection extends RunnableThread {
     private ArrayList<Player> players;
     private Player admin;
     private int maxPlayers;
+    private boolean connected;
 
     public ServerConnection() {
         try {
@@ -30,11 +33,32 @@ public class ServerConnection extends RunnableThread {
 
         this.maxPlayers = -1;
         admin = null;
-        this.players = new ArrayList<>();;
+        this.players = new ArrayList<>();
+        connected = false;
     }
 
     @Override
     public void execute() {
+        if(connected) configs();
+        else connecting();
+    }
+
+    // config champions
+    private void configs() {
+
+        Listener championsListener = m -> {
+           // players.get(m.getId());
+            System.out.println("Name: " + players.get(m.getId()) + " Json champion: " + m.getText());
+        };
+
+        ActionQueue actionQueue = new ActionQueue(new ArrayList<>(players));
+        actionQueue.addAction(new Message(REQUESTCHARACTERS), championsListener, RESPONSE);
+        actionQueue.executeQueue();
+
+        initGame();
+    }
+
+    private void connecting() {
         try {
 
             if(players.size() == 0) System.out.println("waiting for admin to connect...");
@@ -84,12 +108,12 @@ public class ServerConnection extends RunnableThread {
     private void requestName(Player player) {
 
         Listener nameListener = message -> {
-            if(players.stream().map(Player::getName).anyMatch(s -> s.equals(message.getText())))  { // if the name already exists
+            if(players.stream().map(Player::getName).filter(Objects::nonNull).anyMatch(s -> s.equals(message.getText()))){ // if the name already exists
                 player.sendMessage(WRONGNAME);
             }else {
                 player.removeListener();
                 player.setName(message.getText());
-                if(players.size() == maxPlayers && players.stream().noneMatch(p -> p.getName() == null)) initGame(); // if all players really then start
+                if(players.size() == maxPlayers && players.stream().noneMatch(p -> p.getName() == null)) connected = true; // if all players really then start
             }
         };
 

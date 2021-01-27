@@ -4,6 +4,7 @@ import server.comunication.Connection;
 import server.comunication.IDMessage;
 import server.comunication.Listener;
 import server.comunication.Message;
+import server.model.Player;
 
 import java.util.*;
 import java.util.function.Predicate;

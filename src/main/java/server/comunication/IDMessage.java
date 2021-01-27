@@ -11,5 +11,6 @@ public enum IDMessage {
     WRONGNAME,
     STARTED,
     ID,
-    DONE;
+    DONE,
+    REQUESTCHARACTERS;
 }

@@ -1,6 +1,7 @@
 package server.comunication;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import lombok.Data;
 import server.RunnableThread;
 
@@ -46,6 +47,9 @@ public class Receiver extends RunnableThread {
         try {
 
             int bytes = reader.read(buffy);
+
+            if(bytes != -1) return; // didn't read
+
             String jsonMessage = new String(buffy.array(), 0, bytes);
             buffy.clear();
 
@@ -57,6 +61,9 @@ public class Receiver extends RunnableThread {
         } catch (IOException e) {
             System.err.println("Reading interrupted");
             super.stopThread();
+        } catch (JsonSyntaxException e){
+            e.printStackTrace();
+            System.err.println("Error de sintaxis Json: ");
         }
     }
 

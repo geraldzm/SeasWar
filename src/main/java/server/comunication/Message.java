@@ -2,7 +2,7 @@ package server.comunication;
 
 import lombok.Data;
 import lombok.ToString;
-import server.Player;
+import server.model.Player;
 
 @Data
 @ToString
