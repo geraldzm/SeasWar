@@ -16,6 +16,7 @@ public class Network
     private static Message messageAvailable = null;
 
     public static int PlayerID = -1;
+    public static int AmountPlayers = 2;
     public static string name = "";
 
     public static IDMessage lastMessage = IDMessage.NONE;
@@ -27,12 +28,14 @@ public class Network
     private Socket sender;
 
     private byte[] buffer = new byte[32096];
-    public static UIController controller { get; set; }
     public static Matrix matrix { get; set; }
 
     private string receivedMatrix;
 
     public static Dictionary<string, Fighter> warriors = new Dictionary<string, Fighter>();
+
+    public static string[,] namesMatrix = null;
+    public static int[,] intMatrix = null;
 
     private void Start()
     {
@@ -121,14 +124,15 @@ public class Network
         switch (id)
         {
             case IDMessage.MESSAGE:
-                controller.AddChatMessage(messageAvailable.text);
+                // TODO: Agregar un listener en el UI Controller
                 break;
             case IDMessage.LOGBOOK:
-                controller.AddLogbookMessage(messageAvailable.text);
+                // TODO: Agregar un listener en el UI Controller
                 break;
             case IDMessage.ACCEPTED:
                 message = new Message
                 {
+                    id = -1,
                     idMessage = "DONE"
                 };
 
@@ -147,6 +151,7 @@ public class Network
 
                 message = new Message
                 {
+                    id = PlayerID,
                     text = name,
                     idMessage = "RESPONSE" // TODO: Cambiar esto en utils
                 };
@@ -179,6 +184,7 @@ public class Network
 
                 message = new Message
                 {
+                    id = -1,
                     idMessage = "DONE"
                 };
 
@@ -189,7 +195,8 @@ public class Network
                 Debug.Log("Admin");
                 Message admin = new Message
                 {
-                    number = 2, // TODO: Cambiar esto a un combo box
+                    id = -1,
+                    number = AmountPlayers, // TODO: Cambiar esto a un combo box
                     idMessage = "RESPONSE"
                 };
 
@@ -207,12 +214,7 @@ public class Network
 
                 receivedMatrix = messageAvailable.text;
 
-                message = new Message
-                {
-                    idMessage = "DONE"
-                };
-
-                SendMessage(message);
+                SendDone();
 
                 break;
             case IDMessage.INITMATRIX2:
@@ -221,52 +223,38 @@ public class Network
                 Debug.Log("Matriz completamente recibida...");
                 Debug.Log("Matriz: \n" + receivedMatrix);
 
-                string[,] result = JsonConvert.DeserializeObject<string[,]>(receivedMatrix);
-
-                Matrix.SetMatrix(result);
-
-                message = new Message
-                {
-                    idMessage = "DONE"
-                };
-
-                SendMessage(message);
+                namesMatrix = JsonConvert.DeserializeObject<string[,]>(receivedMatrix);
 
                 break;
             case IDMessage.INTMATRIX:
                 Debug.Log("Digale a Juan que parsee esto a una matriz de enteros para habilitar la matriz...");
 
-                message = new Message
-                {
-                    idMessage = "DONE"
-                };
-
-                SendMessage(message);
+                SendDone();
                 break;
             case IDMessage.GETFIGHTER:
                 Debug.Log("Digale a Juan que agregue la funcion aqui para agregarlo a la UI...");
 
-                message = new Message
-                {
-                    idMessage = "DONE"
-                };
-
-                SendMessage(message);
+                SendDone();
                 break;
             default:
                 Debug.Log("Mensaje no soportado: " + messageAvailable.idMessage);
 
-                message = new Message
-                {
-                    idMessage = "DONE"
-                };
-
-                SendMessage(message);
+                SendDone();
 
                 break;
         }
 
         messageAvailable = null;
+    }
+
+    public void SendDone()
+    {
+        Message message = new Message { 
+            idMessage = "DONE",
+            id = PlayerID
+        };
+
+        SendMessage(message);
     }
 
     public void SendMessage(Message message)

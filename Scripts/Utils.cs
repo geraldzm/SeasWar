@@ -52,6 +52,7 @@ public class Utils
             case "INTMATRIX":
                 return IDMessage.INTMATRIX;
             case "GETFIGHTER":
+                return IDMessage.GETFIGHTER;
                 break;
             default:
                 return IDMessage.NONE;

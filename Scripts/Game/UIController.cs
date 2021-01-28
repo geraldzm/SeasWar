@@ -16,8 +16,6 @@ public class UIController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Network.controller = this;
-
         chatContainer = GameObject.Find("ChatContainer");
         logbookContainer = GameObject.Find("LogbookContainer");
         heroesContainer = GameObject.Find("ContentHeroes");

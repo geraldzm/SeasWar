@@ -41,19 +41,27 @@ public class Matrix : MonoBehaviour
                 byteMatrix[col, row] = 100;
 
                 sprite.sortingLayerName = "Objects";
-                sprite.sprite = spriteArray[Random.Range(0, spriteArray.Length - 2)];
+                sprite.sprite = spriteArray[0];
             }
 
-        /*Message message = new Message
-        {
-            idMessage = "DONE"
-        };
-
-        Network.getInstance().SendMessage(message);*/
+        Network.getInstance().SendDone();
     }
 
     void Update()
     {
+        if (Network.namesMatrix != null)
+        {
+            SetMatrix(Network.namesMatrix);
+
+            Message message = new Message
+            {
+                idMessage = "DONE"
+            };
+
+            Network.getInstance().SendMessage(message);
+
+            Network.namesMatrix = null;
+        }
     }
 
     public static void SetMatrix(string[,] receivedMatrix)
@@ -63,7 +71,7 @@ public class Matrix : MonoBehaviour
             for (int row = 0; row < rows; row++) {
                 SpriteRenderer render = matrix[col, row].GetComponent<SpriteRenderer>();
 
-                int index = Utils.getFighterIndex(receivedMatrix[row, col]);
+                int index = Utils.getFighterIndex(receivedMatrix[col, row]);
 
                 render.sprite = spriteStaticArray[index];
             }
