@@ -84,6 +84,7 @@ public class UIController : MonoBehaviour
             case "to:":
                 message = new Message
                 {
+                    id = Network.PlayerID,
                     idMessage = "MESSAGE",
                     texts = parsed
                 };
