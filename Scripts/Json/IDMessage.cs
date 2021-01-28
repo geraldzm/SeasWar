@@ -12,5 +12,7 @@
     ID, 
     DONE,
     REQUESTCHARACTERS,
+    INITMATRIX1,
+    INITMATRIX2,
     NONE
 }

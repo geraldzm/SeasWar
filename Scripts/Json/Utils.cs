@@ -4,6 +4,18 @@ using UnityEngine.UI;
 
 public class Utils
 {
+    public static string[] Fighters = new string[] {
+        "Manta negra", "Poseidon", "Aquaman", "Jack Sparrow", "Davy Jones"
+    };
+
+    public static int getFighterIndex(string fighter)
+    {
+        for (int i = 0; i < Fighters.Length; i++)
+            if (Fighters[i] == fighter) return i;
+
+        return -1;
+    }
+
     public static IDMessage getMessage(string message)
     {
         switch (message)
@@ -32,6 +44,10 @@ public class Utils
                 return IDMessage.ID;
             case "REQUESTCHARACTERS":
                 return IDMessage.REQUESTCHARACTERS;
+            case "INITMATRIX1":
+                return IDMessage.INITMATRIX1;
+            case "INITMATRIX2":
+                return IDMessage.INITMATRIX2;
             default:
                 return IDMessage.NONE;
         }

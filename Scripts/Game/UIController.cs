@@ -6,7 +6,6 @@ using UnityEngine.UI;
 public class UIController : MonoBehaviour
 {
     private Button sendButton;
-    private Network network;
 
     private GameObject chatContainer;
 
@@ -15,11 +14,11 @@ public class UIController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Network.controller = this;
+
         chatContainer = GameObject.Find("ChatContainer");
         sendButton = GameObject.Find("ButtonSend").GetComponent<Button>();
         sendButton.onClick.AddListener(OnBtnSendClick);
-
-        network = GameObject.Find("Network").GetComponent<Network>();
     }
 
     // Update is called once per frame
@@ -42,11 +41,12 @@ public class UIController : MonoBehaviour
     {
         string text = GameObject.Find("TextChat").GetComponent<Text>().text;
 
-        Message message = new Message();
+        Message message = new Message
+        {
+            idMessage = "MESSAGE",
+            text = text
+        };
 
-        message.idMessage = "MESSAGE";
-        message.text = text;
-
-        network.SendMessage(message);
+        Network.getInstance().SendMessage(message);
     }
 }

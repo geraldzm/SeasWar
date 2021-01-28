@@ -2,11 +2,9 @@
 using System;
 using System.Threading;
 using System.Text;
-using SimpleTcp;
-using Newtonsoft.Json;
-
 using System.Net;
 using System.Net.Sockets;
+using Newtonsoft.Json;
 
 public class Network
 {
@@ -15,8 +13,6 @@ public class Network
     public static bool isConnected = false;
 
     private static Message messageAvailable = null;
-
-    private static UIController controller;
 
     public static int PlayerID = -1;
     public static string name = "";
@@ -29,7 +25,11 @@ public class Network
 
     private Socket sender;
 
-    private byte[] buffer = new byte[4096];
+    private byte[] buffer = new byte[32096];
+    public static UIController controller { get; set; }
+    public static Matrix matrix { get; set; }
+
+    private string receivedMatrix;
 
     private void Start()
     {
@@ -84,8 +84,6 @@ public class Network
         {
             Array.Clear(buffer, 0, buffer.Length);
 
-            Debug.Log("Antes de: " + Encoding.UTF8.GetString(buffer));
-
             int bytes = sender.Receive(buffer);
 
             if (bytes <= 0) continue;
@@ -135,12 +133,7 @@ public class Network
                 // TODO: El mero desvergue de cambiar de scene
                 Debug.Log("El juego puede iniciar!");
 
-                message = new Message
-                {
-                    idMessage = "DONE"
-                };
-
-                SendMessage(message);
+                LoginController.ChangeScene = true;
 
                 break;
             case IDMessage.REQUESTNAME:
@@ -202,6 +195,38 @@ public class Network
                 // TODO: Trigger mensaje global
                 Disconnect();
                 break;
+            // Mensajes una vez iniciado el juego
+            case IDMessage.INITMATRIX1:
+                Debug.Log("Primera parte de la matriz...");
+
+                receivedMatrix = messageAvailable.text;
+
+                message = new Message
+                {
+                    idMessage = "DONE"
+                };
+
+                SendMessage(message);
+
+                break;
+            case IDMessage.INITMATRIX2:
+                receivedMatrix += messageAvailable.text;
+
+                Debug.Log("Matriz completamente recibida...");
+                Debug.Log("Matriz: \n" + receivedMatrix);
+
+                string[,] result = JsonConvert.DeserializeObject<string[,]>(receivedMatrix);
+
+                Matrix.SetMatrix(result);
+
+                message = new Message
+                {
+                    idMessage = "DONE"
+                };
+
+                SendMessage(message);
+
+                break;
             default:
                 Debug.Log("Mensaje no soportado: " + messageAvailable.idMessage);
 
@@ -227,37 +252,10 @@ public class Network
 
     public void Disconnect()
     {
+        sender.Shutdown(SocketShutdown.Both);
         sender.Close();
 
         isConnected = false;
-    }
-
-    public void Connect()
-    {
-        //client.Connect();
-
-        isConnected = true;
-    }
-
-    static void Connected(object sender, EventArgs e)
-    {
-        Debug.Log("*** Server connected");
-    }
-
-    static void Disconnected(object sender, EventArgs e)
-    {
-        Debug.Log("*** Server disconnected" + e.ToString());
-    }
-
-    static void DataReceived(object sender, DataReceivedEventArgs e)
-    {
-        string received = Encoding.UTF8.GetString(e.Data);
-
-        Message message = JsonConvert.DeserializeObject<Message>(received);
-
-        Debug.Log("Mensaje recibido");
-
-        messageAvailable = message;
     }
 
     public static Network getInstance()

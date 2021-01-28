@@ -11,9 +11,6 @@ public class FighterGenerator : MonoBehaviour
 
     public string[] FightersAttacks;
     public string[] FightersAttacksEnums;
-    public static string[] FightersName = new string[] { 
-        "Manta negra", "Poseidon", "Aquaman", "Jack Sparrow", "Davy Jones"
-    };
 
     public int[] FightersPorc;
 
@@ -59,7 +56,7 @@ public class FighterGenerator : MonoBehaviour
         {
             Network.name = playerName.text;
 
-            Network.getInstance().Connect();
+            Network.getInstance();
         } else
         {
             Message msgName = new Message
@@ -87,7 +84,7 @@ public class FighterGenerator : MonoBehaviour
             Button button = fighter.transform.Find("FighterButton").GetComponent<Button>();
 
             image.sprite = FightersImage[i];
-            name.text = FightersName[i];
+            name.text = Utils.Fighters[i];
             porc.text = "Porcentaje: " + FightersPorc[i].ToString() + "%";
 
             int localIndex = i;
@@ -105,7 +102,7 @@ public class FighterGenerator : MonoBehaviour
     // Aqui agregamos los jugadores que vamos a usar
     private void generateSelected(int index)
     {
-        if (warriors.ContainsKey(FightersName[index]))
+        if (warriors.ContainsKey(Utils.Fighters[index]))
         {
             // Trigger global message
             return;
@@ -129,7 +126,7 @@ public class FighterGenerator : MonoBehaviour
         Dropdown dpRes = fighter.transform.Find("DPRes").GetComponent<Dropdown>();
         Dropdown dpAttack = fighter.transform.Find("DPAttack").GetComponent<Dropdown>();
 
-        name.text = FightersName[index];
+        name.text = Utils.Fighters[index];
         image.sprite = FightersImage[index];
         porc.text = "Porcentaje: " + FightersPorc[index].ToString() + "%";
 
@@ -169,10 +166,10 @@ public class FighterGenerator : MonoBehaviour
 
         int count = 0;
 
-        for (int i = 0; i < FightersName.Length; i++) 
-            if (warriors.ContainsKey(FightersName[i]))
+        for (int i = 0; i < Utils.Fighters.Length; i++) 
+            if (warriors.ContainsKey(Utils.Fighters[i]))
             {
-                playerFighters[count] = warriors[FightersName[i]];
+                playerFighters[count] = warriors[Utils.Fighters[i]];
                 count++;
             }
 
