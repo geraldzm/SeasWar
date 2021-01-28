@@ -19,6 +19,9 @@ public class Network
     public static int AmountPlayers = 2;
     public static string name = "";
 
+    public static string GlobalMessage = "";
+    public static string LogbookMessage = "";
+
     public static IDMessage lastMessage = IDMessage.NONE;
 
     public IPHostEntry host = Dns.GetHostEntry("localhost");
@@ -123,11 +126,14 @@ public class Network
 
         switch (id)
         {
+            case IDMessage.TURN:
+                
+                break;
             case IDMessage.MESSAGE:
-                // TODO: Agregar un listener en el UI Controller
+                GlobalMessage = messageAvailable.text;
                 break;
             case IDMessage.LOGBOOK:
-                // TODO: Agregar un listener en el UI Controller
+                LogbookMessage = messageAvailable.text;
                 break;
             case IDMessage.ACCEPTED:
                 message = new Message

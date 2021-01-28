@@ -16,5 +16,7 @@
     INITMATRIX2,
     MATRIX,
     GETFIGHTER,
-    NONE
+    NONE,
+    TURN,
+    FINISHTURN
 }

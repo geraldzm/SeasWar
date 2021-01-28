@@ -29,7 +29,19 @@ public class UIController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (Network.LogbookMessage != "")
+        {
+            AddLogbookMessage(Network.LogbookMessage);
+
+            Network.LogbookMessage = "";
+        }
+
+        if (Network.GlobalMessage != "")
+        {
+            AddChatMessage(Network.GlobalMessage);
+
+            Network.GlobalMessage = "";
+        }
     }
 
     // Permite agregar mensajes al chat
@@ -67,7 +79,7 @@ public class UIController : MonoBehaviour
 
         Message message;
 
-        switch (parsed[0])
+        switch (parsed[0].ToLower())
         {
             case "attack":
                 message = new Message
@@ -87,6 +99,15 @@ public class UIController : MonoBehaviour
                     id = Network.PlayerID,
                     idMessage = "MESSAGE",
                     texts = parsed
+                };
+
+                Network.getInstance().SendMessage(message);
+                break;
+            case "skip":
+                message = new Message
+                {
+                    id = Network.PlayerID,
+                    idMessage = "FINISHTURN"
                 };
 
                 Network.getInstance().SendMessage(message);
