@@ -1,5 +1,6 @@
 package server.model;
 
+import com.google.gson.Gson;
 import lombok.Data;
 import server.comunication.Connection;
 
@@ -21,6 +22,17 @@ public class Player extends Connection {
         champions = new ArrayList<>(3);
     }
 
+    public void setChampions(String[] jsonChampions) {
+        Gson gson = new Gson();
 
+        for (int i = 0; i < jsonChampions.length; i++){
+            Champion champion = gson.fromJson(jsonChampions[i], Champion.class);
+            champion.setPercentage(champion.getPercentage());
+            // --- > flata instaciar el attaque corerspondiente, si tiene waves entonces hacer un new de waves y as[i
+            champions.add(champion);
+        }
 
+        System.out.println("Se configuran los champios de: " + name + " champiosn: ");
+        champions.forEach(c -> System.out.println("\t" + c.toString()));
+    }
 }

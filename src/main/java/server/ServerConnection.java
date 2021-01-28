@@ -1,14 +1,20 @@
 package server;
 
+import com.google.gson.Gson;
 import lombok.Getter;
 import server.comunication.Listener;
 import server.comunication.Message;
+import server.model.Box;
+import server.model.Champion;
 import server.model.Player;
+import server.model.Village;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static server.comunication.IDMessage.*;
 
@@ -45,27 +51,44 @@ public class ServerConnection extends RunnableThread {
     private void configs() {
         System.out.println("entra a configs");
 
-        // champions
-        Listener championsListener = m -> {
-            System.out.println("Llegan los campeones de: " + players.get(m.getId()).getName() + " Json champion: " + Arrays.toString(m.getTexts()));
-        };
+        // ask for champions
+        Listener championsListener = m -> players.get(m.getId()).setChampions(m.getTexts());
 
         new ActionQueue(new ArrayList<>(players))
                 .addAction(new Message(REQUESTCHARACTERS), championsListener, RESPONSE)
                 .executeQueue();
 
 
-   /*     // create villages
+        // create villages
         players.forEach(p -> {
             Village village = new Village();
             village.initVillage(p.getChampions()); // create matrix
             p.setVillage(village);
         });
 
-*/
+        // send matrix to clients
 
-        stopThread();
-        //   initGame();
+        {
+            Gson g = new Gson();
+            ActionQueue actionQueue = new ActionQueue(new ArrayList<>(players));
+
+            for (int i = 0; i < players.size(); i++) {
+                List<List<String>> justNames = Arrays.stream(players.get(i).getVillage().getMatrix()) // map list of boxes to their names
+                        .map(boxes -> Arrays.stream(boxes).map(Box::getName) // each box to string
+                                .collect(Collectors.toList())
+                        ).collect(Collectors.toList()); // each list of boxes to list of strings
+
+                System.out.println("resultado del map " + players.get(i).getName());
+                String s = g.toJson(justNames);
+                System.out.println(s);
+                actionQueue.addAction(new Message(s, INITMATRIX));
+            }
+
+            actionQueue.executeQueue();
+        }
+
+
+        initGame();
     }
 
     private void connecting() {

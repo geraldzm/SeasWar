@@ -12,5 +12,7 @@ public enum IDMessage {
     STARTED,
     ID,
     DONE,
-    REQUESTCHARACTERS;
+    REQUESTCHARACTERS,
+    INITMATRIX,
+    MATRIX;
 }
