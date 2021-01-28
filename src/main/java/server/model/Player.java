@@ -25,8 +25,11 @@ public class Player extends Connection {
     public void setChampions(String[] jsonChampions) {
         Gson gson = new Gson();
 
-        for (int i = 0; i < jsonChampions.length; i++){
-            Champion champion = gson.fromJson(jsonChampions[i], Champion.class);
+        for (String jsonChampion : jsonChampions) {
+            Champion champion = gson.fromJson(jsonChampion, Champion.class);
+
+            assert champion != null : "null champion generated with : " + jsonChampion;
+
             champion.setPercentage(champion.getPercentage());
             // --- > flata instaciar el attaque corerspondiente, si tiene waves entonces hacer un new de waves y as[i
             champions.add(champion);

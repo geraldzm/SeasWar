@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * <h1>matrix of each client</h1>
@@ -19,7 +20,6 @@ public class Village {
         this.matrix = new Box[ROWS][COLUMNS]; // row column
         this.random = new Random();
     }
-
 
     public void initVillage(ArrayList<Champion> champions){
 
@@ -52,4 +52,23 @@ public class Village {
     }
 
 
+    /**
+     * Map each box to the name of its owner
+     * */
+    public List<List<String>> mapMatrixToNames(){
+        return Arrays.stream(matrix) // map list of boxes to their names
+                .map(boxes -> Arrays.stream(boxes).map(Box::getName) // each box to string
+                        .collect(Collectors.toList())
+                ).collect(Collectors.toList()); // each list of boxes to list of strings
+    }
+
+    /**
+     * Map each box to its percentage
+     * */
+    public List<List<Byte>> mapMatrixToPercentage(){
+        return Arrays.stream(matrix) // map list of boxes to their names
+                .map(boxes -> Arrays.stream(boxes).map(Box::getPercentage) // each box to byte
+                        .collect(Collectors.toList())
+                ).collect(Collectors.toList()); // each list of boxes to list of strings
+    }
 }

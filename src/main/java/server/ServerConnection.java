@@ -56,45 +56,14 @@ public class ServerConnection extends RunnableThread {
                 .addAction(new Message(REQUESTCHARACTERS), m -> players.get(m.getId()).setChampions(m.getTexts()), RESPONSE)
                 .executeQueue();
 
-
-        // create villages
+        // create villages and instance champion powers
         players.forEach(p -> {
             Village village = new Village();
             village.initVillage(p.getChampions()); // create matrix
             p.setVillage(village);
+
+            p.getChampions().forEach(Champion::initPowers);
         });
-
-        // send matrix to clients
-        {
-            Gson g = new Gson();
-
-            for (int i = 0; i < players.size(); i++) {
-                Player player = players.get(i);
-
-                ActionQueue actionQueue = new ActionQueue(Collections.singletonList(player));
-
-                List<List<String>> justNames = Arrays.stream(player.getVillage().getMatrix()) // map list of boxes to their names
-                        .map(boxes -> Arrays.stream(boxes).map(Box::getName) // each box to string
-                                .collect(Collectors.toList())
-                        ).collect(Collectors.toList()); // each list of boxes to list of strings
-
-                System.out.println("resultado del map " + player.getName());
-                String s = g.toJson(justNames);
-                System.out.println(s);
-
-                //divide string in two parts
-                String firstPart = s.substring(0, s.length()/2);
-                System.out.println("primera parte: " + firstPart);
-                actionQueue.addAction(new Message(firstPart, INITMATRIX1));
-
-                String secondPart = s.substring((s.length()/2)+1);
-                System.out.println("segunda parte: " + secondPart);
-                actionQueue.addAction(new Message(secondPart, INITMATRIX2));
-
-                actionQueue.executeQueue();
-            }
-
-        }
 
 
         initGame();
@@ -177,6 +146,35 @@ public class ServerConnection extends RunnableThread {
         System.out.println("Esperando a que todos esten listos...");
 
         ActionQueue.quickActionQueue(players, new Message(STARTED));
+
+        System.out.println("pasa el started");
+        // send matrix to clients
+        {
+            Gson g = new Gson();
+
+            for (int i = 0; i < players.size(); i++) {
+                Player player = players.get(i);
+
+                ActionQueue actionQueue = new ActionQueue(Collections.singletonList(player));
+
+                List<List<String>> justNames = Arrays.stream(player.getVillage().getMatrix()) // map list of boxes to their names
+                        .map(boxes -> Arrays.stream(boxes).map(Box::getName) // each box to string
+                                .collect(Collectors.toList())
+                        ).collect(Collectors.toList()); // each list of boxes to list of strings
+
+                String s = g.toJson(justNames);
+
+                //divide string in two parts
+                String firstPart = s.substring(0, s.length() / 2);
+                actionQueue.addAction(new Message(firstPart, INITMATRIX1));
+
+                String secondPart = s.substring((s.length() / 2) + 1);
+                actionQueue.addAction(new Message(secondPart, INITMATRIX1));
+
+                System.out.println("Ejecuta la cola");
+                actionQueue.executeQueue();
+            }
+        }
 
         System.out.println("Todos listos!");
         stopThread();

@@ -26,9 +26,10 @@ public class ActionQueue {
     private HashSet<Integer> ready;
     private final Listener listener = m -> {
         synchronized (lock){
+            System.out.println(m.toString());
             done++;
             action.ifPresent(ls -> ls.action(m));
-            if(m.getId() != null) ready.add(m.getId());
+            if(m.getId() != -1) ready.add(m.getId());
             lock.notify();
         }
     };
@@ -79,7 +80,8 @@ public class ActionQueue {
             // POPS
             action = actionsQueue.poll();
             ArrayList<Message> messages = queueMessages.poll().orElse(null);
-            Optional<Predicate<Message>> filter = Optional.of(filters.poll().orElse(message -> true).and(m -> !ready.contains(m.getId())));
+            Optional<Predicate<Message>> filter = Optional.of(filters.poll().orElse(message -> true)
+                    .and(m -> !needID(m) || !ready.contains(m.getId())));
 
             // SEND
             for (int i = 0; i < recipients.size(); i++) {
@@ -112,6 +114,11 @@ public class ActionQueue {
             if(c.getGameListener().isPresent() && c.getGameListener().get() == listener)
                 c.setGameListener(Optional.empty());
         });
+    }
+
+    private boolean needID(Message m) {
+        IDMessage idMessage = m.getIdMessage();
+        return idMessage != ADMIN && idMessage != ID && idMessage != ACCEPTED;
     }
 
     public void executeQueue() {
