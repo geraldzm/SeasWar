@@ -15,17 +15,13 @@ public class Matrix : MonoBehaviour
     public Sprite[] spriteArray;
 
     public static Sprite[] spriteStaticArray;
+    public static Sprite deadTile;
+    public static Sprite lowLifeTile;
 
     void Start()
     {
-        Message message = new Message
-        {
-            idMessage = "DONE"
-        };
-
-        Network.getInstance().SendMessage(message);
-
         spriteStaticArray = spriteArray;
+        deadTile = spriteStaticArray[6];
 
         matrix = new GameObject[cols, rows];
         byteMatrix = new byte[cols, rows];
@@ -45,8 +41,15 @@ public class Matrix : MonoBehaviour
                 byteMatrix[col, row] = 100;
 
                 sprite.sortingLayerName = "Objects";
-                sprite.sprite = spriteArray[0];
+                sprite.sprite = spriteArray[Random.Range(0, spriteArray.Length - 2)];
             }
+
+        /*Message message = new Message
+        {
+            idMessage = "DONE"
+        };
+
+        Network.getInstance().SendMessage(message);*/
     }
 
     void Update()
@@ -63,6 +66,28 @@ public class Matrix : MonoBehaviour
                 int index = Utils.getFighterIndex(receivedMatrix[row, col]);
 
                 render.sprite = spriteStaticArray[index];
+            }
+        }
+    }
+
+    public static void SetMatrixByInts(int[,] receivedMatrix)
+    {
+        for (int col = 0; col < cols; col++)
+        {
+            for (int row = 0; row < rows; row++)
+            {
+                SpriteRenderer render = matrix[col, row].GetComponent<SpriteRenderer>();
+
+                float life = receivedMatrix[row, col];
+
+                if (life != 0)
+                    render.color = new Color(1, life / 100f, life / 100f, 1);
+                else
+                {
+                    render.color = new Color(1, 1, 1, 1);
+                    render.sprite = deadTile;
+                }
+
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Text;
 using System.Net;
@@ -30,6 +31,8 @@ public class Network
     public static Matrix matrix { get; set; }
 
     private string receivedMatrix;
+
+    public static Dictionary<string, Fighter> warriors = new Dictionary<string, Fighter>();
 
     private void Start()
     {
@@ -119,6 +122,9 @@ public class Network
         {
             case IDMessage.MESSAGE:
                 controller.AddChatMessage(messageAvailable.text);
+                break;
+            case IDMessage.LOGBOOK:
+                controller.AddLogbookMessage(messageAvailable.text);
                 break;
             case IDMessage.ACCEPTED:
                 message = new Message
@@ -226,6 +232,26 @@ public class Network
 
                 SendMessage(message);
 
+                break;
+            case IDMessage.INTMATRIX:
+                Debug.Log("Digale a Juan que parsee esto a una matriz de enteros para habilitar la matriz...");
+
+                message = new Message
+                {
+                    idMessage = "DONE"
+                };
+
+                SendMessage(message);
+                break;
+            case IDMessage.GETFIGHTER:
+                Debug.Log("Digale a Juan que agregue la funcion aqui para agregarlo a la UI...");
+
+                message = new Message
+                {
+                    idMessage = "DONE"
+                };
+
+                SendMessage(message);
                 break;
             default:
                 Debug.Log("Mensaje no soportado: " + messageAvailable.idMessage);
