@@ -67,15 +67,18 @@ public class ServerConnection extends RunnableThread {
         // send matrix to clients
         {
             Gson g = new Gson();
-            ActionQueue actionQueue = new ActionQueue(new ArrayList<>(players));
 
             for (int i = 0; i < players.size(); i++) {
-                List<List<String>> justNames = Arrays.stream(players.get(i).getVillage().getMatrix()) // map list of boxes to their names
+                Player player = players.get(i);
+
+                ActionQueue actionQueue = new ActionQueue(Collections.singletonList(player));
+
+                List<List<String>> justNames = Arrays.stream(player.getVillage().getMatrix()) // map list of boxes to their names
                         .map(boxes -> Arrays.stream(boxes).map(Box::getName) // each box to string
                                 .collect(Collectors.toList())
                         ).collect(Collectors.toList()); // each list of boxes to list of strings
 
-                System.out.println("resultado del map " + players.get(i).getName());
+                System.out.println("resultado del map " + player.getName());
                 String s = g.toJson(justNames);
                 System.out.println(s);
 
@@ -87,9 +90,10 @@ public class ServerConnection extends RunnableThread {
                 String secondPart = s.substring((s.length()/2)+1);
                 System.out.println("segunda parte: " + secondPart);
                 actionQueue.addAction(new Message(secondPart, INITMATRIX2));
+
+                actionQueue.executeQueue();
             }
 
-            actionQueue.executeQueue();
         }
 
 
