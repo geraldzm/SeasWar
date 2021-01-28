@@ -65,13 +65,34 @@ public class UIController : MonoBehaviour
             return;
         }
 
-        Message message = new Message
-        {
-            idMessage = "MESSAGE",
-            texts = parsed
-        };
+        Message message;
 
-        Network.getInstance().SendMessage(message);
+        switch (parsed[0])
+        {
+            case "attack":
+                message = new Message
+                {
+                    idMessage = "ATTACK",
+                    id = Network.PlayerID,
+                    texts = parsed
+                };
+
+                Network.getInstance().SendMessage(message);
+
+                break;
+            case "chat":
+            case "to:":
+                message = new Message
+                {
+                    idMessage = "MESSAGE",
+                    texts = parsed
+                };
+
+                Network.getInstance().SendMessage(message);
+                break;
+            default:
+                break;
+        }
     }
 
     // Funcion para generar los personajes recibidos en el warriors

@@ -226,10 +226,9 @@ public class Network
                 namesMatrix = JsonConvert.DeserializeObject<string[,]>(receivedMatrix);
 
                 break;
-            case IDMessage.INTMATRIX:
-                Debug.Log("Digale a Juan que parsee esto a una matriz de enteros para habilitar la matriz...");
+            case IDMessage.MATRIX:
+                intMatrix = JsonConvert.DeserializeObject<int[,]>(messageAvailable.text);
 
-                SendDone();
                 break;
             case IDMessage.GETFIGHTER:
                 Debug.Log("Digale a Juan que agregue la funcion aqui para agregarlo a la UI...");

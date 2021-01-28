@@ -62,6 +62,20 @@ public class Matrix : MonoBehaviour
 
             Network.namesMatrix = null;
         }
+
+        if (Network.intMatrix != null)
+        {
+            SetMatrixByInts(Network.intMatrix);
+
+            Message message = new Message
+            {
+                idMessage = "DONE"
+            };
+
+            Network.getInstance().SendMessage(message);
+
+            Network.intMatrix = null;
+        }
     }
 
     public static void SetMatrix(string[,] receivedMatrix)
@@ -71,7 +85,7 @@ public class Matrix : MonoBehaviour
             for (int row = 0; row < rows; row++) {
                 SpriteRenderer render = matrix[col, row].GetComponent<SpriteRenderer>();
 
-                int index = Utils.getFighterIndex(receivedMatrix[col, row]);
+                int index = Utils.getFighterIndex(receivedMatrix[row, col]);
 
                 render.sprite = spriteStaticArray[index];
             }

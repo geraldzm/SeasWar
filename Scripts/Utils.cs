@@ -49,11 +49,10 @@ public class Utils
                 return IDMessage.INITMATRIX1;
             case "INITMATRIX2":
                 return IDMessage.INITMATRIX2;
-            case "INTMATRIX":
-                return IDMessage.INTMATRIX;
+            case "MATRIX":
+                return IDMessage.MATRIX;
             case "GETFIGHTER":
                 return IDMessage.GETFIGHTER;
-                break;
             default:
                 return IDMessage.NONE;
         }
@@ -108,9 +107,9 @@ public class Utils
     {
         var match = Regex.Matches(message, @"(\w)+");
 
-        if (match.Count < 3) return null;
+        if (match.Count < 4) return null;
 
-        string val = match[2].Value.ToLower();
+        string val = match[3].Value.ToLower();
 
         // Caso kraken
         if (val == "tentacle" || val == "breath" || val == "releasekraken")
@@ -151,13 +150,13 @@ public class Utils
     {
         var match = Regex.Matches(message, @"(\w)+");
 
-        string val = match[2].Value.ToLower();
+        string val = match[3].Value.ToLower();
 
         if (val == "swirlraising" || val == "sendhuman")
         {
-            if (match.Count != 5) return null;
+            if (match.Count != 6) return null;
 
-            if (!ValidatePoint(new string[] { match[3].Value, match[4].Value })) return null;
+            if (!ValidatePoint(new string[] { match[4].Value, match[5].Value })) return null;
         }
         else if (val == "radioactive" && match.Count != 3)
         {
@@ -172,7 +171,7 @@ public class Utils
     {
         var match = Regex.Matches(message, @"(\w)+");
 
-        if (match.Count != 3)
+        if (match.Count != 4)
         {
             return null;
         }
@@ -185,17 +184,17 @@ public class Utils
     {
         var match = Regex.Matches(message, @"(\w)+");
 
-        string val = match[2].Value.ToLower();
+        string val = match[3].Value.ToLower();
 
-        if (val == "volcanoraising" && match.Count != 3)
+        if (val == "volcanoraising" && match.Count != 4)
         {
             return null;
         }
         else if (val == "volcanoexplosion" || val == "termalrush")
         {
-            if (match.Count != 5) return null;
+            if (match.Count != 6) return null;
 
-            if (!ValidatePoint(new string[] { match[3].Value, match[4].Value})) return null;
+            if (!ValidatePoint(new string[] { match[4].Value, match[5].Value})) return null;
         }
 
         return MatchToArray(match);
@@ -206,15 +205,15 @@ public class Utils
     {
         var match = Regex.Matches(message, @"(\w)+");
 
-        string val = match[2].Value.ToLower();
+        string val = match[3].Value.ToLower();
 
         if (val == "cardumen")
         {
-            if (match.Count != 4) return null;
+            if (match.Count != 5) return null;
 
-            if (!ValidateNumber(match[3].Value, 100, 300)) return null;
+            if (!ValidateNumber(match[4].Value, 100, 300)) return null;
         }
-        else if ((val == "sharkattack" || val == "pulp") && match.Count != 3)
+        else if ((val == "sharkattack" || val == "pulp") && match.Count != 4)
         {
             return null;
         }
@@ -227,24 +226,24 @@ public class Utils
     {
         var match = Regex.Matches(message, @"(\w)+");
 
-        string val = match[2].Value.ToLower();
+        string val = match[3].Value.ToLower();
 
         if (val == "threelines")
         {
-            if (match.Count != 9) return null;
+            if (match.Count != 10) return null;
 
             // Validamos los tres puntos
-            if (!ValidatePoint(new string[] { match[3].Value, match[4].Value })) return null;
-            if (!ValidatePoint(new string[] { match[5].Value, match[6].Value })) return null;
-            if (!ValidatePoint(new string[] { match[7].Value, match[8].Value })) return null;
+            if (!ValidatePoint(new string[] { match[4].Value, match[5].Value })) return null;
+            if (!ValidatePoint(new string[] { match[6].Value, match[7].Value })) return null;
+            if (!ValidatePoint(new string[] { match[8].Value, match[9].Value })) return null;
         }
         else if (val == "threenumbers")
         {
-            if (match.Count != 6) return null;
+            if (match.Count != 7) return null;
 
-            if (!ValidateNumber(match[3].Value, 0, 9)) return null;
             if (!ValidateNumber(match[4].Value, 0, 9)) return null;
             if (!ValidateNumber(match[5].Value, 0, 9)) return null;
+            if (!ValidateNumber(match[6].Value, 0, 9)) return null;
         }
 
         return MatchToArray(match);
@@ -259,28 +258,28 @@ public class Utils
 
         if (val == "tentacle")
         {
-            if (match.Count != 9) return null;
+            if (match.Count != 10) return null;
 
             // Validamos los tres puntos
-            if (!ValidatePoint(new string[] { match[3].Value, match[4].Value })) return null;
-            if (!ValidatePoint(new string[] { match[5].Value, match[6].Value })) return null;
-            if (!ValidatePoint(new string[] { match[7].Value, match[8].Value })) return null;
+            if (!ValidatePoint(new string[] { match[4].Value, match[5].Value })) return null;
+            if (!ValidatePoint(new string[] { match[6].Value, match[7].Value })) return null;
+            if (!ValidatePoint(new string[] { match[8].Value, match[9].Value })) return null;
         }
         else if (val == "breath")
         {
-            if (match.Count != 6) return null;
+            if (match.Count != 7) return null;
 
             // Validamos que el punto del respiro sea correcto
-            if (!ValidatePoint(new string[] { match[3].Value, match[4].Value })) return null;
+            if (!ValidatePoint(new string[] { match[4].Value, match[5].Value })) return null;
 
             // Validamos las direcciones
-            string dir = match[5].Value.ToLower();
+            string dir = match[6].Value.ToLower();
 
             if (dir != "up" && dir != "down" && dir != "left" && dir != "right") return null;
         }
         else if (val == "releasekraken")
         {
-            if (match.Count != 4 || !ValidateNumber(match[3].Value, 1, 9)) return null;
+            if (match.Count != 5 || !ValidateNumber(match[4].Value, 1, 9)) return null;
         }
 
         return MatchToArray(match);
@@ -421,9 +420,9 @@ public class Utils
 
                 if (test < 0) throw new FormatException("Numero negativo");
 
-                if (i == 1 && test >= Matrix.cols) throw new FormatException("Out of bounds");
+                if (i == 1 && test >= Matrix.rows) throw new FormatException("Out of bounds");
 
-                if (i == 2 && test >= Matrix.rows) throw new FormatException("Out of bounds");
+                if (i == 2 && test >= Matrix.cols) throw new FormatException("Out of bounds");
             }
             catch (FormatException)
             {
