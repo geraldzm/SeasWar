@@ -52,10 +52,8 @@ public class ServerConnection extends RunnableThread {
         System.out.println("entra a configs");
 
         // ask for champions
-        Listener championsListener = m -> players.get(m.getId()).setChampions(m.getTexts());
-
         new ActionQueue(new ArrayList<>(players))
-                .addAction(new Message(REQUESTCHARACTERS), championsListener, RESPONSE)
+                .addAction(new Message(REQUESTCHARACTERS), m -> players.get(m.getId()).setChampions(m.getTexts()), RESPONSE)
                 .executeQueue();
 
 
@@ -67,7 +65,6 @@ public class ServerConnection extends RunnableThread {
         });
 
         // send matrix to clients
-
         {
             Gson g = new Gson();
             ActionQueue actionQueue = new ActionQueue(new ArrayList<>(players));
@@ -81,7 +78,15 @@ public class ServerConnection extends RunnableThread {
                 System.out.println("resultado del map " + players.get(i).getName());
                 String s = g.toJson(justNames);
                 System.out.println(s);
-                actionQueue.addAction(new Message(s, INITMATRIX));
+
+                //divide string in two parts
+                String firstPart = s.substring(0, s.length()/2);
+                System.out.println("primera parte: " + firstPart);
+                actionQueue.addAction(new Message(firstPart, INITMATRIX1));
+
+                String secondPart = s.substring((s.length()/2)+1);
+                System.out.println("segunda parte: " + secondPart);
+                actionQueue.addAction(new Message(secondPart, INITMATRIX2));
             }
 
             actionQueue.executeQueue();

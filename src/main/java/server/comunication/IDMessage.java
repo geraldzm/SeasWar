@@ -13,6 +13,7 @@ public enum IDMessage {
     ID,
     DONE,
     REQUESTCHARACTERS,
-    INITMATRIX,
+    INITMATRIX1,
+    INITMATRIX2,
     MATRIX;
 }
