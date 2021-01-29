@@ -33,13 +33,13 @@ public class Connection {
 
         // listener switcher
         receiver.setListener(Optional.of(m -> {
-            System.out.println("entra la listener de connection el cual tiene: " + gameListener.isPresent());
-            System.out.println("Mensaje en connection: " + m.toString()+ " filtro: " + filter.isPresent()+ " pasa filtro o no: " +filter.orElse(f -> true).test(m));
+        //    System.out.println("entra la listener de connection el cual tiene: " + gameListener.isPresent());
+          //  System.out.println("Mensaje en connection: " + m.toString()+ " filtro: " + filter.isPresent()+ " pasa filtro o no: " +filter.orElse(f -> true).test(m));
 
             if (m.getIdMessage() == MESSAGE)
                 chatListener.ifPresent(c -> c.action(m));
             else if (filter.orElse(f -> true).test(m)){
-                System.out.println("Pasa el filtro");
+            //    System.out.println("Pasa el filtro");
                 gameListener.ifPresent(c -> c.action(m));
             }
 

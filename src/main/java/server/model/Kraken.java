@@ -1,14 +1,16 @@
 package server.model;
-
-import java.util.Random;
+import java.util.*;
 
 public class Kraken extends Attack {
 
-    Random random;
+    private Random random;
+    private ArrayList<Coordinate> tridentBoxes;
+
 
     public Kraken(Champion owner) {
         super(IDATTACK.KRAKEN, owner, new String[]{"tentacle", "breath", "releasekraken"});
         random = new Random();
+        tridentBoxes = new ArrayList<>();
     }
 
     // uses the coordinate
@@ -19,16 +21,22 @@ public class Kraken extends Attack {
         // que destruyen lo que esté en el
         // radio de 1 casilla alrededor.
 
-        AttackBoxListener attacker = (box, coordinate) -> {
-            System.out.println("Kraken de"+ getOwner().getName() +" atacando: " + box.getName() + " coordenada "+coordinate.toString() );
-            box.setPercentage((byte) 0);
-            //falta validar que el mae no tenga un tridente, si lo tiene, entonces el ataque se devuelve
-        };
+        AttackBoxListener attacker = this::IfTrident;
 
         for (int i = 4; i < 4+3*2; i += 2) {
-            System.out.println("Punto numero: " + i);
             Coordinate coordinate = new Coordinate(Integer.parseInt(command[i]), Integer.parseInt(command[i+1]));
             applyToArea(village, 3, coordinate, attacker);
+        }
+
+        killBoxesFromTrident();
+    }
+
+    private void IfTrident(Box box, Coordinate coordinate) {
+
+        if(box.getOwner().getAttacks().stream().noneMatch(attack -> attack instanceof Trident)){ // si el enemigo tiene un tridente
+            box.setPercentage((byte) 0);
+        }else {
+            tridentBoxes.add(coordinate);
         }
     }
 
@@ -41,25 +49,28 @@ public class Kraken extends Attack {
         //        destruye entre 1 y 8 casillas en esa
         //        dirección.
 
-        AttackBoxListener attacker = (box, coordinate) -> {
-            System.out.println("Kraken de"+ getOwner().getName() +" atacando: " + box.getName() + " coordenada "+ coordinate.toString() );
-            box.setPercentage((byte) 0);
-            //falta validar que el mae no tenga un tridente, si lo tiene, entonces el ataque se devuelve
-        };
-
-
-        Coordinate coo = getCoordinate();
-        assert coo != null: "Coordinate null, first attack, Kraken";
+        AttackBoxListener attacker = this::IfTrident;
 
         int range = random.nextInt(8)+1; // 1-8
-        //up
-        applyToDirection(village, range, coo, attacker, new Coordinate(-1, 0));
-        //down
-        applyToDirection(village, range, coo, attacker, new Coordinate(1, 0));
-        //left
-        applyToDirection(village, range, coo, attacker, new Coordinate(0, -1));
-        //right
-        applyToDirection(village, range, coo, attacker, new Coordinate(0, 1));
+        Coordinate velocity;
+
+        switch (command[4]){
+            case "up" -> velocity = new Coordinate(-1, 0);
+            case "down" -> velocity = new Coordinate(1, 0);
+            case "left" -> velocity = new Coordinate(0, -1);
+            case "right" -> velocity = new Coordinate(0, 1);
+           // case "all" -> velocity = new Coordinate(0, 1);
+            default -> velocity = new Coordinate(0, 0);
+        }
+
+        try{
+            applyToDirection(village, range, new Coordinate(Integer.parseInt(command[5]), Integer.parseInt(command[6])), attacker, velocity);
+        }catch (Exception e){
+            e.printStackTrace();
+            return;
+        }
+
+        killBoxesFromTrident();
     }
 
     @Override
@@ -69,16 +80,34 @@ public class Kraken extends Attack {
         //      destruye todo en un radio de
         //      1,2,3,4,5,6,7,8,9 casillas.
 
-        Coordinate coo = getCoordinate();
-        assert coo != null: "Coordinate null, first attack, Kraken";
-
-        AttackBoxListener attacker = (box, coordinate) -> {
-            System.out.println("Kraken de"+ getOwner().getName() +" atacando: " + box.getName() + " coordenada "+coordinate.toString() );
-            box.setPercentage((byte) 0);
-            //falta validar que el mae no tenga un tridente, si lo tiene, entonces el ataque se devuelve
-        };
+        AttackBoxListener attacker = this::IfTrident;
 
         int area = random.nextInt(8)+1; // 1-8
-        applyToArea(village, area, coo, attacker);
+        System.out.println("release the kraken area:" + area);
+
+        try {
+            Coordinate coordinate = new Coordinate(Integer.parseInt(command[4]), Integer.parseInt(command[5]));
+            applyToArea(village, area, coordinate, attacker);
+        }catch (Exception e){
+            e.printStackTrace();
+            return;
+        }
+        killBoxesFromTrident();
+    }
+
+
+    private void killBoxesFromTrident() {
+
+        if(tridentBoxes.size() == 0) return;
+
+        Player owner = getOwner().getOwner(); // owner of champion
+
+        // enviamos las casilla que se le retornan
+        tridentBoxes.forEach(coordinate -> {
+            owner.getVillage()
+                    .getMatrix()[coordinate.row][coordinate.column].setPercentage((byte) 0); // kill box
+        });
+
+        tridentBoxes.clear();
     }
 }

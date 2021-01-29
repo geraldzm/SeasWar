@@ -23,13 +23,14 @@ public class Champion {
 
     private transient Integer amountBoxes;
     private transient ArrayList<Attack> attacks;
+    private transient Player owner;
 
     public void setPercentage(Integer percentage) {
         this.percentage = percentage;
         amountBoxes = 6 * percentage;
     }
 
-    public void initPowers(){
+    public void initPowers() {
         attacks = new ArrayList<>(3);
         for (IDATTACK idAttack : idAttacks) addPower(idAttack);
     }

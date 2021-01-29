@@ -2,6 +2,7 @@ package server;
 
 
 import com.google.gson.Gson;
+import server.comunication.IDMessage;
 import server.comunication.Listener;
 import server.comunication.Message;
 import server.model.*;
@@ -24,6 +25,7 @@ public class Server extends RunnableThread implements Listener {
     private final Object turnLocker;
 
     private Player current;
+    private Player toAttackPlayer;
     private int turn;
 
     public Server() {
@@ -88,6 +90,7 @@ public class Server extends RunnableThread implements Listener {
         ActionQueue.quickActionQueue(new ArrayList<>(Collections.singletonList(current)), new Message(TURN));
 
         System.out.println("accepta el turno a " + current.getName());
+        current.sendChatMessage("Es tu turno!");
 
         current.removeReceiverFilter();
         current.setGameListener(Optional.of(this));
@@ -112,10 +115,18 @@ public class Server extends RunnableThread implements Listener {
             try {
                 turnLocker.wait();
 
+                if(toAttackPlayer != null){
+                    setMatrixTo(toAttackPlayer);
+                }
+
+                setMatrixTo(current);
+
                 ActionQueue.quickActionQueue(new ArrayList<>(Collections.singletonList(current)),
                         new Message(FINISHTURN));
 
                 System.out.println("Termina la cola de la FINISHTURN");
+
+                toAttackPlayer = null;
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -126,6 +137,17 @@ public class Server extends RunnableThread implements Listener {
 
         current.removeListener();
         nextTurn();
+    }
+
+    private void setMatrixTo(Player toSend) {
+        List<List<Byte>> lists = toSend.getVillage().mapMatrixToPercentage();
+
+        String jsonBytes = new Gson().toJson(lists);
+        assert jsonBytes != null: "Se genero una matriz de bytes nula";
+
+        ActionQueue.quickActionQueue(new ArrayList<>(Collections.singletonList(toSend)),
+                new Message(jsonBytes, MATRIX));
+        System.out.println("Termina la cola de la  MATRIX");
     }
 
 
@@ -170,13 +192,13 @@ public class Server extends RunnableThread implements Listener {
                 String toAttackName = texts[2];
                 Player playerAttacking = playersByID.get(message.getId());
 
-                if(playersByName.get(toAttackName) == null) {
+                toAttackPlayer = playersByName.get(toAttackName);
+
+                if(toAttackPlayer == null) {
                     System.err.println("No existe el jugador : " + toAttackName);
                     playerAttacking.sendChatMessage("No puede atacar a " + toAttackName);
                     break;
                 }
-
-                Player toAttackPlayer = playersByName.get(toAttackName);
 
                 Optional<Champion> champion = current.getChampions().stream().filter(c -> c.getName().equals(texts[1])).findFirst();
 
@@ -186,28 +208,12 @@ public class Server extends RunnableThread implements Listener {
                     break;
                 }
 
-
                 for(Attack attack : champion.get().getAttacks()){
                     if(attack.attackWith(texts[3], texts, toAttackPlayer.getVillage())){
                         //successful attack
-
-                        // send matrix
-                        List<List<Byte>> mappedToBytes = toAttackPlayer.getVillage().mapMatrixToPercentage();
-                        String jsonBytes = new Gson().toJson(mappedToBytes);
-
-                        assert jsonBytes != null : "Bytes of matrix are null";
-
-                        System.out.println("Se hicieron los ataques");
-
-                        ActionQueue.quickActionQueue(new ArrayList<>(Collections.singletonList(toAttackPlayer)),
-                                new Message(jsonBytes, MATRIX));
-
-                        System.out.println("Termina la cola de la  MATRIX");
-
                         synchronized (turnLocker) {
                             turnLocker.notify();
                         }
-
                         return;
                     }
                 }
@@ -215,6 +221,10 @@ public class Server extends RunnableThread implements Listener {
                 playerAttacking.sendChatMessage("No se puede atacar con " + texts[3] + " porque no existe ese ataque");
             }
         }
+    }
+
+    public Player getByName(String name){
+        return playersByName.get(name);
     }
 
     public static void printMatrix(Box[][] matrix){

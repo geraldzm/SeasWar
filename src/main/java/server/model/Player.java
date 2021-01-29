@@ -30,6 +30,7 @@ public class Player extends Connection {
 
             assert champion != null : "null champion generated with : " + jsonChampion;
 
+            champion.setOwner(this);
             champion.setPercentage(champion.getPercentage());
             // --- > flata instaciar el attaque corerspondiente, si tiene waves entonces hacer un new de waves y as[i
             champions.add(champion);

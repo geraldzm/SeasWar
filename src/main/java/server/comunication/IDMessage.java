@@ -19,5 +19,9 @@ public enum IDMessage {
     TURN,
     SKIP,
     FINISHTURN,
+    VOLCANO,
+    GARBAGE,
+    WAVES,
+    NUMBERS,
     ATTACK;
 }

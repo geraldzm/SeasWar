@@ -49,7 +49,6 @@ public class ServerConnection extends RunnableThread {
 
     // config champions
     private void configs() {
-        System.out.println("entra a configs");
 
         // ask for champions
         new ActionQueue(new ArrayList<>(players))
@@ -143,11 +142,9 @@ public class ServerConnection extends RunnableThread {
      * <p>Notify all players that every one is really to start</p>
      * */
     private void initGame() {
-        System.out.println("Esperando a que todos esten listos...");
 
         ActionQueue.quickActionQueue(players, new Message(STARTED));
 
-        System.out.println("pasa el started");
         // send matrix to clients
         {
             Gson g = new Gson();
@@ -168,12 +165,10 @@ public class ServerConnection extends RunnableThread {
                 String secondPart = s.substring(s.length() / 2);
                 actionQueue.addAction(new Message(secondPart, INITMATRIX2));
 
-                System.out.println("Ejecuta la cola");
                 actionQueue.executeQueue();
             }
         }
 
-        System.out.println("Todos listos!");
         stopThread();
     }
 }

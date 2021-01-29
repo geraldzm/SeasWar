@@ -43,11 +43,8 @@ public abstract class Attack {
      */
     public void applyToArea(Village village, int area, Coordinate coordinate, AttackBoxListener attackBoxListener) {
 
-        int contador = 0;
         for (int row = -area; row <= area; row++) {
             for (int column = -area; column <= area; column++) {
-
-                System.out.println("Atacando numero: " + contador++);
                 Coordinate coordinateToAttack = new Coordinate(coordinate.row + row, coordinate.column + column);
                 if (village.isOutOfMatrix(coordinateToAttack)) continue;
                 attackBoxListener.attackBox(village.getMatrix()[coordinateToAttack.row][coordinateToAttack.column], coordinateToAttack);
@@ -60,10 +57,12 @@ public abstract class Attack {
      * Goes over that direction from the point given. And calls the listener with each box
      */
     public void applyToDirection(Village village, int range, Coordinate coordinate, AttackBoxListener attackBoxListener, Coordinate velocity) {
-
+        System.out.println("---velocidades  " + velocity.row + " " + velocity.column);
         for (int i = 0; i < range; i++) {
-            Coordinate next = new Coordinate(coordinate.row + velocity.row, coordinate.column + velocity.column);
+            System.out.println("---" + i);
+            Coordinate next = new Coordinate(coordinate.row + velocity.row * i, coordinate.column + velocity.column * i);
             if (village.isOutOfMatrix(next)) return;
+            System.out.println("---Se pasa el if " + next.row + " " + next.column);
             attackBoxListener.attackBox(village.getMatrix()[next.row][next.column], next);
         }
     }
