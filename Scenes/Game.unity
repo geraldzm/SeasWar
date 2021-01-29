@@ -2653,7 +2653,7 @@ MonoBehaviour:
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 1
-  m_ChildControlHeight: 0
+  m_ChildControlHeight: 1
   m_ChildScaleWidth: 1
   m_ChildScaleHeight: 0
 --- !u!114 &589190690
@@ -2865,8 +2865,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 407911211}
   m_HandleRect: {fileID: 407911210}
   m_Direction: 0
-  m_Value: 0
-  m_Size: 0.99999994
+  m_Value: 1
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -5917,7 +5917,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 329596526}
   m_HandleRect: {fileID: 329596525}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -6500,7 +6500,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 159070683}
   m_HandleRect: {fileID: 159070682}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -8477,8 +8477,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1889091552}
   m_HandleRect: {fileID: 1889091551}
   m_Direction: 0
-  m_Value: 0
-  m_Size: 1
+  m_Value: 1
+  m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
