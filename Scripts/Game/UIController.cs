@@ -191,8 +191,6 @@ public class UIController : MonoBehaviour
         switch (parsed[0].ToLower())
         {
             case "attack":
-                if (!Network.isUIEnabled) return;
-
                 message = new Message
                 {
                     idMessage = "ATTACK",
