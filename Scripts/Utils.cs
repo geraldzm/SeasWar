@@ -53,6 +53,8 @@ public class Utils
                 return IDMessage.MATRIX;
             case "GETFIGHTER":
                 return IDMessage.GETFIGHTER;
+            case "FINISHTURN":
+                return IDMessage.FINISHTURN;
             default:
                 return IDMessage.NONE;
         }

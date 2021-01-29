@@ -241,6 +241,9 @@ public class Network
 
                 SendDone();
                 break;
+            case IDMessage.FINISHTURN:
+                SendDone();
+                break;
             default:
                 Debug.Log("Mensaje no soportado: " + messageAvailable.idMessage);
 
