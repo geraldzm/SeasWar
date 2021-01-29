@@ -14,11 +14,16 @@ public class UIController : MonoBehaviour
     private Text playerName;
 
     public GameObject chatPrefab;
-    
+
+    public Sprite[] warriors;
+
+    public static Sprite[] staticWarriors;
 
     // Start is called before the first frame update
     void Start()
     {
+        staticWarriors = warriors;
+
         chatContainer = GameObject.Find("ChatContainer");
         logbookContainer = GameObject.Find("LogbookContainer");
         heroesContainer = GameObject.Find("ContentHeroes");
@@ -137,10 +142,11 @@ public class UIController : MonoBehaviour
     // Esta funcion agrega un solo luchador a la lista
     public void AppendWarrior(string warriorName)
     {
-
         GameObject reference = (GameObject)Instantiate(Resources.Load("GameFighter"), heroesContainer.transform);
 
         Fighter fighter = Network.warriors[warriorName];
+
+        Image image = reference.transform.Find("FighterImage").GetComponent<Image>();
 
         Text name = reference.transform.Find("FighterName").GetComponent<Text>();
         Text porc = reference.transform.Find("FighterPorc").GetComponent<Text>();
@@ -148,6 +154,8 @@ public class UIController : MonoBehaviour
         Text power = reference.transform.Find("FighterRes").GetComponent<Text>();
         Text res = reference.transform.Find("FighterHealth").GetComponent<Text>();
         Text attack = reference.transform.Find("FighterAttack").GetComponent<Text>();
+
+        image.sprite = staticWarriors[Utils.getFighterIndex(warriorName)];
 
         name.text = warriorName;
         porc.text = "Porcentaje: " + fighter.per.ToString();

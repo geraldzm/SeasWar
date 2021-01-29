@@ -5457,10 +5457,10 @@ MonoBehaviour:
   m_ChildAlignment: 0
   m_Spacing: 0
   m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 1
-  m_ChildControlHeight: 1
-  m_ChildScaleWidth: 1
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
 --- !u!1 &1571201194
 GameObject:
@@ -5727,6 +5727,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   chatPrefab: {fileID: 7893556162239965897, guid: cddef9b11db29ca4f9b183440b35ea35,
     type: 3}
+  warriors:
+  - {fileID: 21300000, guid: 3ca96a5f1c0c88147bbfef32d8a0eabd, type: 3}
+  - {fileID: 21300000, guid: edf6c19e107a14748b5c97953b2fe0a2, type: 3}
+  - {fileID: 21300000, guid: 4961202c8f628b14691f2707e03ec6ee, type: 3}
+  - {fileID: 21300000, guid: 0650e2fdcf3e1bc438e7aa287d349f9c, type: 3}
+  - {fileID: 21300000, guid: 2f04d04e6e8a0c84eb21d405d7abd4e4, type: 3}
 --- !u!4 &1625318577
 Transform:
   m_ObjectHideFlags: 0
@@ -7683,8 +7689,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1889091552}
   m_HandleRect: {fileID: 1889091551}
   m_Direction: 0
-  m_Value: 1
-  m_Size: 0.99999994
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
