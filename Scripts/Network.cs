@@ -243,6 +243,7 @@ public class Network
                 break;
             case IDMessage.FINISHTURN:
                 SendDone();
+                Debug.Log("FINISHTURN : Done enviado...");
                 break;
             default:
                 Debug.Log("Mensaje no soportado: " + messageAvailable.idMessage);

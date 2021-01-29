@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class Utils
 {
     public static string[] Fighters = new string[] {
-        "Manta negra", "Poseidon", "Aquaman", "Jack Sparrow", "Davy Jones"
+        "MantaNegra", "Poseidon", "Aquaman", "JackSparrow", "DavyJones"
     };
 
     public static int getFighterIndex(string fighter)
