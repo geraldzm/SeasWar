@@ -215,8 +215,6 @@ public class UIController : MonoBehaviour
                 Network.getInstance().SendMessage(message);
                 break;
             case "skip":
-                if (!Network.isUIEnabled) return;
-
                 message = new Message
                 {
                     id = Network.PlayerID,
@@ -224,6 +222,28 @@ public class UIController : MonoBehaviour
                 };
 
                 Network.getInstance().SendMessage(message);
+                break;
+            case "show":
+                message = new Message
+                {
+                    id = Network.PlayerID,
+                    idMessage = "GETSTATEBOX",
+                    texts = parsed
+                };
+
+                Network.getInstance().SendMessage(message);
+
+                break;
+            case "enemy":
+                message = new Message
+                {
+                    id = Network.PlayerID,
+                    idMessage = "GETSTATEENEMY",
+                    texts = parsed
+                };
+
+                Network.getInstance().SendMessage(message);
+
                 break;
             default:
                 break;

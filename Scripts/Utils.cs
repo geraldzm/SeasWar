@@ -315,7 +315,7 @@ public class Utils
     // Parsea el comando para un enemigo (enemy / nombre)
     private static string[] ParseEnemy(string message)
     {
-        string[] rst = new string[2] { "", "" };
+        string[] rst = new string[2] { "", ""};
 
         var match = Regex.Matches(message, @"(\w)+");
 
