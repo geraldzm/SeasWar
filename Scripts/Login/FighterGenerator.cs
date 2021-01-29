@@ -22,6 +22,12 @@ public class FighterGenerator : MonoBehaviour
 
     public static Dictionary<string, Fighter> warriors = new Dictionary<string, Fighter>();
 
+    private static Dictionary<int, int> valuesIndex = new Dictionary<int, int>() {
+        { 100, 0 },
+        { 75, 1 },
+        { 50, 2 }
+    };
+
     private bool playButtonClicked = false;
 
     void Start()
@@ -48,6 +54,37 @@ public class FighterGenerator : MonoBehaviour
     void Update()
     {
         
+    }
+
+    private int GetAvailableValue()
+    {
+        Dictionary<int, int> available = new Dictionary<int, int>
+        {
+            { 50, 0 },
+            { 75, 0 },
+            { 100, 0 }
+        };
+
+        Fighter[] currentFighters = GetFighters();
+
+        if (warriors.Count == 0) return 100;
+
+        for (int i = 0; i < currentFighters.Length; i++)
+        {
+            if (currentFighters[i] == null) continue;
+
+            available[currentFighters[i].res]++;
+            available[currentFighters[i].power]++;
+            available[currentFighters[i].health]++;
+        }
+
+        if (available[50] < 3) return 50;
+
+        if (available[75] < 3) return 75;
+
+        if (available[100] < 3) return 100;
+
+        return 100;
     }
 
     private void OnPlayButton()
@@ -205,9 +242,9 @@ public class FighterGenerator : MonoBehaviour
             per = 0,
 
             // TODO: Cambiar estos por uno de obtener libres
-            power = values[0],
-            res = values[0],
-            health = values[0],
+            power = GetAvailableValue(),
+            res = GetAvailableValue(),
+            health = GetAvailableValue(),
             attacks = new string[] { FightersAttacksEnums[0] }
         };
 
@@ -223,6 +260,10 @@ public class FighterGenerator : MonoBehaviour
                 // TODO: Habilitar mensaje global
             }
         });
+
+        dpPower.value = valuesIndex[fighterRef.power];
+        dpHealth.value = valuesIndex[fighterRef.health];
+        dpRes.value = valuesIndex[fighterRef.res];
 
         dpPower.onValueChanged.AddListener(delegate {
             fighterRef.power = values[dpPower.value];

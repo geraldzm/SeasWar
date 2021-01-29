@@ -11,7 +11,10 @@ public class UIController : MonoBehaviour
     private GameObject logbookContainer;
     private GameObject heroesContainer;
 
+    private Text playerName;
+
     public GameObject chatPrefab;
+    
 
     // Start is called before the first frame update
     void Start()
@@ -19,9 +22,12 @@ public class UIController : MonoBehaviour
         chatContainer = GameObject.Find("ChatContainer");
         logbookContainer = GameObject.Find("LogbookContainer");
         heroesContainer = GameObject.Find("ContentHeroes");
+        playerName = GameObject.Find("PlayerName").GetComponent<Text>();
 
         sendButton = GameObject.Find("ButtonSend").GetComponent<Button>();
         sendButton.onClick.AddListener(OnBtnSendClick);
+
+        playerName.text = "Jugador: " + Network.name;
 
         AppendWarriors();
     }
@@ -107,7 +113,7 @@ public class UIController : MonoBehaviour
                 message = new Message
                 {
                     id = Network.PlayerID,
-                    idMessage = "FINISHTURN"
+                    idMessage = "SKIP"
                 };
 
                 Network.getInstance().SendMessage(message);
