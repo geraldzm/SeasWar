@@ -219,11 +219,9 @@ public class Utils
 
         string val = match[3].Value.ToLower();
 
-        if (val == "cardumen")
+        if (val == "cardumen" && match.Count != 4)
         {
-            if (match.Count != 5) return null;
-
-            if (!ValidateNumber(match[4].Value, 100, 300)) return null;
+            return null;
         }
         else if ((val == "sharkattack" || val == "pulp") && match.Count != 4)
         {
