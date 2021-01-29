@@ -242,6 +242,8 @@ public class Network
                 SendDone();
                 break;
             case IDMessage.FINISHTURN:
+                Debug.Log("El finish retorna DONE");
+
                 SendDone();
                 Debug.Log("FINISHTURN : Done enviado...");
                 break;

@@ -63,9 +63,8 @@ public class Matrix : MonoBehaviour
             SetMatrixByInts(Network.intMatrix);
 
             Network.getInstance().SendDone();
-
             Network.intMatrix = null;
-        }
+        }  
     }
 
     public static void SetMatrix(string[,] receivedMatrix)
