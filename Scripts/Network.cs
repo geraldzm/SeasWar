@@ -19,9 +19,6 @@ public class Network
     public static int AmountPlayers = 2;
     public static string name = "";
 
-    public static string GlobalMessage = "";
-    public static string LogbookMessage = "";
-
     public static IDMessage lastMessage = IDMessage.NONE;
 
     public IPHostEntry host = Dns.GetHostEntry("localhost");
@@ -39,6 +36,15 @@ public class Network
 
     public static string[,] namesMatrix = null;
     public static int[,] intMatrix = null;
+    public static int[,] lavaArray = null;
+    public static int[,] waveArray = null;
+    public static int[,] toxicArray = null;
+
+    public static int askingNumbers = -1;
+
+    public static string GlobalMessage = "";
+    public static string LogbookMessage = "";
+    public static string AttackMessage = "";
 
     private void Start()
     {
@@ -134,6 +140,9 @@ public class Network
                 break;
             case IDMessage.LOGBOOK:
                 LogbookMessage = messageAvailable.text;
+                break;
+            case IDMessage.ATTACKLOG:
+                AttackMessage = messageAvailable.text;
                 break;
             case IDMessage.ACCEPTED:
                 message = new Message
@@ -240,6 +249,18 @@ public class Network
                 Debug.Log("Digale a Juan que agregue la funcion aqui para agregarlo a la UI...");
 
                 SendDone();
+                break;
+            case IDMessage.VOLCANO:
+                lavaArray = JsonConvert.DeserializeObject<int[,]>(messageAvailable.text);
+                break;
+            case IDMessage.WAVES:
+                waveArray = JsonConvert.DeserializeObject<int[,]>(messageAvailable.text);
+                break;
+            case IDMessage.GARBAGE:
+                toxicArray = JsonConvert.DeserializeObject<int[,]>(messageAvailable.text);
+                break;
+            case IDMessage.NUMBERS:
+                askingNumbers = 1;
                 break;
             case IDMessage.FINISHTURN:
                 Debug.Log("El finish retorna DONE");

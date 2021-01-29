@@ -55,6 +55,16 @@ public class Utils
                 return IDMessage.GETFIGHTER;
             case "FINISHTURN":
                 return IDMessage.FINISHTURN;
+            case "VOLCANO":
+                return IDMessage.VOLCANO;
+            case "GARBAGE":
+                return IDMessage.GARBAGE;
+            case "WAVES":
+                return IDMessage.WAVES;
+            case "NUMBERS":
+                return IDMessage.NUMBERS;
+            case "ATTACKLOG":
+                return IDMessage.ATTACKLOG;
             default:
                 return IDMessage.NONE;
         }
@@ -271,13 +281,13 @@ public class Utils
         {
             if (match.Count != 7) return null;
 
-            // Validamos que el punto del respiro sea correcto
-            if (!ValidatePoint(new string[] { match[4].Value, match[5].Value })) return null;
-
             // Validamos las direcciones
-            string dir = match[6].Value.ToLower();
+            string dir = match[4].Value.ToLower();
 
-            if (dir != "up" && dir != "down" && dir != "left" && dir != "right") return null;
+            if (dir != "up" && dir != "down" && dir != "left" && dir != "right" && dir != "all") return null;
+
+            // Validamos que el punto del respiro sea correcto
+            if (!ValidatePoint(new string[] { match[5].Value, match[6].Value })) return null;
         }
         else if (val == "releasekraken")
         {

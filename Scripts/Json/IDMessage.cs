@@ -3,6 +3,7 @@
     ACCEPTED, 
     ADMIN, 
     LOGBOOK, 
+    ATTACKLOG,
     MESSAGE, 
     RESPONSE, 
     REJECTED, 
@@ -18,5 +19,9 @@
     GETFIGHTER,
     NONE,
     TURN,
-    FINISHTURN
+    FINISHTURN, 
+    VOLCANO, 
+    GARBAGE, 
+    WAVES, 
+    NUMBERS
 }

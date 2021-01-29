@@ -18,6 +18,10 @@ public class Matrix : MonoBehaviour
     public static Sprite deadTile;
     public static Sprite lowLifeTile;
 
+    public Sprite lavaTile;
+    public Sprite waveTile;
+    public Sprite toxicTile;
+
     void Start()
     {
         spriteStaticArray = spriteArray;
@@ -65,6 +69,63 @@ public class Matrix : MonoBehaviour
             Network.getInstance().SendDone();
             Network.intMatrix = null;
         }  
+
+        if (Network.lavaArray != null)
+        {
+            SetVolcanos(Network.lavaArray);
+
+            Network.getInstance().SendDone();
+            Network.lavaArray = null;
+        }
+
+        if (Network.toxicArray != null)
+        {
+            SetWaves(Network.toxicArray);
+
+            Network.getInstance().SendDone();
+            Network.toxicArray = null;
+        }
+
+        if (Network.waveArray != null)
+        {
+            SetWaves(Network.waveArray);
+
+            Network.getInstance().SendDone();
+            Network.waveArray = null;
+        }
+    }
+
+    public void SetVolcanos(int[,] positions)
+    {
+        for (int i = 0; i < positions.GetLength(0); i++)
+        {
+            int row = positions[i, 0];
+            int col = positions[i, 1];
+
+            matrix[col, row].GetComponent<SpriteRenderer>().sprite = lavaTile;
+        }
+    }
+
+    public void SetWaves(int[,] positions)
+    {
+        for (int i = 0; i < positions.GetLength(0); i++)
+        {
+            int row = positions[i, 0];
+            int col = positions[i, 1];
+
+            matrix[col, row].GetComponent<SpriteRenderer>().sprite = waveTile;
+        }
+    }
+
+    public void SetToxic(int[,] positions)
+    {
+        for (int i = 0; i < positions.GetLength(0); i++)
+        {
+            int row = positions[i, 0];
+            int col = positions[i, 1];
+
+            matrix[col, row].GetComponent<SpriteRenderer>().sprite = lavaTile;
+        }
     }
 
     public static void SetMatrix(string[,] receivedMatrix)
