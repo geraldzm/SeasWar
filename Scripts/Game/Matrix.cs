@@ -53,12 +53,7 @@ public class Matrix : MonoBehaviour
         {
             SetMatrix(Network.namesMatrix);
 
-            Message message = new Message
-            {
-                idMessage = "DONE"
-            };
-
-            Network.getInstance().SendMessage(message);
+            Network.getInstance().SendDone();
 
             Network.namesMatrix = null;
         }
@@ -67,12 +62,7 @@ public class Matrix : MonoBehaviour
         {
             SetMatrixByInts(Network.intMatrix);
 
-            Message message = new Message
-            {
-                idMessage = "DONE"
-            };
-
-            Network.getInstance().SendMessage(message);
+            Network.getInstance().SendDone();
 
             Network.intMatrix = null;
         }

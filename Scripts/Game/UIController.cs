@@ -18,6 +18,7 @@ public class UIController : MonoBehaviour
     public Sprite[] warriors;
 
     public static Sprite[] staticWarriors;
+    public Sprite[] tiles;
 
     // Start is called before the first frame update
     void Start()
@@ -147,6 +148,7 @@ public class UIController : MonoBehaviour
         Fighter fighter = Network.warriors[warriorName];
 
         Image image = reference.transform.Find("FighterImage").GetComponent<Image>();
+        Image tile = reference.transform.Find("FighterTile").GetComponent<Image>();
 
         Text name = reference.transform.Find("FighterName").GetComponent<Text>();
         Text porc = reference.transform.Find("FighterPorc").GetComponent<Text>();
@@ -156,6 +158,7 @@ public class UIController : MonoBehaviour
         Text attack = reference.transform.Find("FighterAttack").GetComponent<Text>();
 
         image.sprite = staticWarriors[Utils.getFighterIndex(warriorName)];
+        tile.sprite = tiles[Utils.getFighterIndex(warriorName)];
 
         name.text = warriorName;
         porc.text = "Porcentaje: " + fighter.per.ToString();
