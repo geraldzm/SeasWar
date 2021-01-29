@@ -4,10 +4,7 @@ package server;
 import com.google.gson.Gson;
 import server.comunication.Listener;
 import server.comunication.Message;
-import server.model.Box;
-import server.model.Champion;
-import server.model.Player;
-import server.model.Village;
+import server.model.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -16,38 +13,87 @@ import static server.comunication.IDMessage.*;
 
 public class Server extends RunnableThread implements Listener {
 
-    ArrayList<Player> playersByID;
+    private ArrayList<Player> players;
+    private ArrayList<Player> loosers;
+    private Hashtable<Integer, Player> playersByID;
+    private Hashtable<Integer, Player> playersByTurn;
+    private Hashtable<String, Player> playersByName;
 
+    private boolean playing;
+
+    private final Object turnLocker;
+
+    private Player current;
+    private int turn;
 
     public Server() {
-        playersByID = connectPlayers();
+        players = connectPlayers();
+        playersByID = new Hashtable<>();
+        playersByName = new Hashtable<>();
+        playersByTurn = new Hashtable<>();
+        loosers = new ArrayList<>();
 
+        players.forEach(p ->{
+            playersByID.put(p.getId(), p);
+            System.out.println("agregando : " + p.getName());
+            playersByName.put(p.getName(), p);
+        });
 
-        /*
-        * problema grave :
-        * aveces un usuario me manda un ID el cual no se le asigno, yo filtro las respuestas por ID
-        * entonces puede que su DONE lo rechace si ya alguno con ese ID mando DONE
-        * */
+        // random turn
+        ArrayList<Player> shuffled = new ArrayList<>(players);
+        Collections.shuffle(shuffled);
+        for (int i = 0; i < shuffled.size(); i++) {
+            playersByTurn.put(i, shuffled.get(i));
+        }
+
+        // chat mensaje
+        // to nombre mensaje
+
         //chat
         System.out.println("Configurando el chat: ");
-        playersByID.forEach(p -> p.setChatListener(
+        players.forEach(p -> p.setChatListener(
                 Optional.of(m -> {
-                    ArrayList<String> names = (ArrayList<String>) Arrays.asList(m.getTexts());
-                    System.out.println("names is empty: "+names.isEmpty());
-                    playersByID.stream().filter(pl -> names.isEmpty() || names.contains(pl.getName())) // filter if it is private
-                            .forEach(p2 -> p2.sendChatMessage(p.getName()+ m.getText()));
+                    if(m.getTexts()[0].equals("chat"))
+                        players.forEach(pToSend -> pToSend.sendChatMessage(m.getTexts()[1]));
+                    else
+                        players.stream()
+                                .filter(pToSend -> pToSend.getId() == m.getId() || pToSend.getName().equals(m.getTexts()[1])) // filter the sender and the name
+                                .forEach(pToSend -> pToSend.sendChatMessage(m.getTexts()[2])); //
                 })
         ));
 
-        //game listener
-        playersByID.forEach(p -> p.setGameListener(Optional.of(this)));
+        turnLocker = new Object();
+        turn = 0;
+        playing = true;
+    }
 
+    private void nextTurn(){
+        turn = turn+1 >= playersByTurn.size() ? 0: turn+1; // next turn
+        if(loosers.contains(turn)){
+            System.out.println("nos saltamos el turno " + turn);
+            nextTurn();
+        }
     }
 
     @Override
     public void execute() {
 
-        System.out.println("\n\n\nHasta ahora tengo: ");
+        if(!playing) stopThread();
+
+        current = playersByTurn.get(turn);
+        assert current != null: "Turn " + turn +" does not match any player";
+
+        System.out.println("Se notifica el inicio de turno a " + current.getName());
+        //notify it is your turn
+        ActionQueue.quickActionQueue(new ArrayList<>(Collections.singletonList(current)), new Message(TURN));
+
+        System.out.println("accepta el turno a " + current.getName());
+
+        current.removeReceiverFilter();
+        current.setGameListener(Optional.of(this));
+
+
+      /*  System.out.println("\n\n\nHasta ahora tengo: ");
         System.out.println("---------Players------------");
         playersByID.forEach(player -> {
             System.out.println("Player: " + player.getName()+ " " + player.getId());
@@ -59,9 +105,27 @@ public class Server extends RunnableThread implements Listener {
             System.out.println("\n\nVillage {");
             printMatrix(player.getVillage().getMatrix());
             System.out.println("} ----");
-        });
+        });*/
 
-        stopThread();
+        // wait until he changes turn
+        synchronized (turnLocker) {
+            try {
+                turnLocker.wait();
+
+                ActionQueue.quickActionQueue(new ArrayList<>(Collections.singletonList(current)),
+                        new Message(FINISHTURN));
+
+                System.out.println("Termina la cola de la FINISHTURN");
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("fin del turno a " + current.getName());
+
+        current.removeListener();
+        nextTurn();
     }
 
 
@@ -83,9 +147,74 @@ public class Server extends RunnableThread implements Listener {
         return serverConnections.getPlayers();
     }
 
-
     public static void main(String[] args) {
         new Server().startThread();
+    }
+
+    @Override
+    public void action(Message message) {
+        System.out.println("Llega un comando: " + message.toString());
+
+        switch (message.getIdMessage()) {
+            case SKIP -> {
+                synchronized (turnLocker) {
+                    turnLocker.notify();
+                }
+            }
+            case ATTACK -> {
+
+                // attack <championName> <nombre> tentacle <col> <row> <col> <row> <col> <row>
+                String[] texts = message.getTexts();
+                System.out.println("Se intenta atacar: " + Arrays.toString(texts));
+
+                String toAttackName = texts[2];
+                Player playerAttacking = playersByID.get(message.getId());
+
+                if(playersByName.get(toAttackName) == null) {
+                    System.err.println("No existe el jugador : " + toAttackName);
+                    playerAttacking.sendChatMessage("No puede atacar a " + toAttackName);
+                    break;
+                }
+
+                Player toAttackPlayer = playersByName.get(toAttackName);
+
+                Optional<Champion> champion = current.getChampions().stream().filter(c -> c.getName().equals(texts[1])).findFirst();
+
+                if(champion.isEmpty()) {
+                    System.err.println("El jugador : " + playerAttacking + " no tiene le champion: " + texts[1]);
+                    playerAttacking.sendChatMessage("No puede atacar a " + toAttackName);
+                    break;
+                }
+
+
+                for(Attack attack : champion.get().getAttacks()){
+                    if(attack.attackWith(texts[3], texts, toAttackPlayer.getVillage())){
+                        //successful attack
+
+                        // send matrix
+                        List<List<Byte>> mappedToBytes = toAttackPlayer.getVillage().mapMatrixToPercentage();
+                        String jsonBytes = new Gson().toJson(mappedToBytes);
+
+                        assert jsonBytes != null : "Bytes of matrix are null";
+
+                        System.out.println("Se hicieron los ataques");
+
+                        ActionQueue.quickActionQueue(new ArrayList<>(Collections.singletonList(toAttackPlayer)),
+                                new Message(jsonBytes, MATRIX));
+
+                        System.out.println("Termina la cola de la  MATRIX");
+
+                        synchronized (turnLocker) {
+                            turnLocker.notify();
+                        }
+
+                        return;
+                    }
+                }
+
+                playerAttacking.sendChatMessage("No se puede atacar con " + texts[3] + " porque no existe ese ataque");
+            }
+        }
     }
 
     public static void printMatrix(Box[][] matrix){
@@ -108,9 +237,4 @@ public class Server extends RunnableThread implements Listener {
 
     }
 
-
-    @Override
-    public void action(Message message) {
-
-    }
 }

@@ -157,10 +157,7 @@ public class ServerConnection extends RunnableThread {
 
                 ActionQueue actionQueue = new ActionQueue(Collections.singletonList(player));
 
-                List<List<String>> justNames = Arrays.stream(player.getVillage().getMatrix()) // map list of boxes to their names
-                        .map(boxes -> Arrays.stream(boxes).map(Box::getName) // each box to string
-                                .collect(Collectors.toList())
-                        ).collect(Collectors.toList()); // each list of boxes to list of strings
+                List<List<String>> justNames = player.getVillage().mapMatrixToNames();
 
                 String s = g.toJson(justNames);
 
@@ -168,8 +165,8 @@ public class ServerConnection extends RunnableThread {
                 String firstPart = s.substring(0, s.length() / 2);
                 actionQueue.addAction(new Message(firstPart, INITMATRIX1));
 
-                String secondPart = s.substring((s.length() / 2) + 1);
-                actionQueue.addAction(new Message(secondPart, INITMATRIX1));
+                String secondPart = s.substring(s.length() / 2);
+                actionQueue.addAction(new Message(secondPart, INITMATRIX2));
 
                 System.out.println("Ejecuta la cola");
                 actionQueue.executeQueue();

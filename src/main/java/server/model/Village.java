@@ -52,6 +52,10 @@ public class Village {
     }
 
 
+    public boolean isOutOfMatrix(Coordinate coordinate){
+        return coordinate.column < 0 || coordinate.column >= COLUMNS || coordinate.row < 0 || coordinate.row >= ROWS;
+    }
+
     /**
      * Map each box to the name of its owner
      * */

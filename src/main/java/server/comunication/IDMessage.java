@@ -15,5 +15,9 @@ public enum IDMessage {
     REQUESTCHARACTERS,
     INITMATRIX1,
     INITMATRIX2,
-    MATRIX;
+    MATRIX,
+    TURN,
+    SKIP,
+    FINISHTURN,
+    ATTACK;
 }
