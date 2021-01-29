@@ -169,6 +169,13 @@ public class UIController : MonoBehaviour
             return;
         }
 
+        if (parsed[2].ToLower() == Network.name.ToLower())
+        {
+            AddChatMessage("Game: No te puedes herir a ti mismo :c quierete we"); 
+
+            return;
+        }
+
         Message message;
 
         switch (parsed[0].ToLower())
