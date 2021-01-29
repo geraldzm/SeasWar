@@ -5,6 +5,7 @@
     LOGBOOK, 
     ATTACKLOG,
     MESSAGE, 
+    LOOSER,
     RESPONSE, 
     REJECTED, 
     REQUESTNAME,

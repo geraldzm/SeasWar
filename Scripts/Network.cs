@@ -12,6 +12,7 @@ public class Network
     public static Network network;
 
     public static bool isConnected = false;
+    public static bool isUIEnabled = false;
 
     private static Message messageAvailable = null;
 
@@ -45,6 +46,8 @@ public class Network
     public static string GlobalMessage = "";
     public static string LogbookMessage = "";
     public static string AttackMessage = "";
+
+    public static string updateWarrior = "";
 
     private void Start()
     {
@@ -133,7 +136,9 @@ public class Network
         switch (id)
         {
             case IDMessage.TURN:
-                
+                isUIEnabled = true;
+
+                SendDone();
                 break;
             case IDMessage.MESSAGE:
                 GlobalMessage = messageAvailable.text;
@@ -246,7 +251,7 @@ public class Network
 
                 break;
             case IDMessage.GETFIGHTER:
-                Debug.Log("Digale a Juan que agregue la funcion aqui para agregarlo a la UI...");
+                updateWarrior = messageAvailable.text;
 
                 SendDone();
                 break;
@@ -264,9 +269,16 @@ public class Network
                 break;
             case IDMessage.FINISHTURN:
                 Debug.Log("El finish retorna DONE");
+                isUIEnabled = false;
 
                 SendDone();
                 Debug.Log("FINISHTURN : Done enviado...");
+                break;
+            case IDMessage.LOOSER:
+                GlobalMessage = "Has perdido...";
+                isUIEnabled = false;
+
+                SendDone();
                 break;
             default:
                 Debug.Log("Mensaje no soportado: " + messageAvailable.idMessage);

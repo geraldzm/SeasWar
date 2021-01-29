@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,6 +23,8 @@ public class UIController : MonoBehaviour
     public Sprite[] tiles;
 
     private bool responseNumber = false;
+
+    private Dictionary<string, GameObject> warriorData = new Dictionary<string, GameObject>();
 
     // Start is called before the first frame update
     void Start()
@@ -72,6 +75,13 @@ public class UIController : MonoBehaviour
 
             responseNumber = true;
             Network.askingNumbers = -1;
+        }
+
+        if (Network.updateWarrior != "")
+        {
+            UpdateWarriorData(Network.updateWarrior);
+
+            Network.updateWarrior = "";
         }
     }
 
@@ -181,6 +191,8 @@ public class UIController : MonoBehaviour
         switch (parsed[0].ToLower())
         {
             case "attack":
+                if (!Network.isUIEnabled) return;
+
                 message = new Message
                 {
                     idMessage = "ATTACK",
@@ -203,6 +215,8 @@ public class UIController : MonoBehaviour
                 Network.getInstance().SendMessage(message);
                 break;
             case "skip":
+                if (!Network.isUIEnabled) return;
+
                 message = new Message
                 {
                     id = Network.PlayerID,
@@ -230,10 +244,35 @@ public class UIController : MonoBehaviour
         }
     }
 
+    public void UpdateWarriorData(string warriorname)
+    {
+        if (!warriorData.ContainsKey(warriorname) || !Network.warriors.ContainsKey(warriorname)) return;
+
+        GameObject warrior = warriorData[warriorname];
+
+        Fighter fighter = Network.warriors[warriorname];
+
+        Text attack = warrior.transform.Find("FighterAttack").GetComponent<Text>();
+
+        attack.text = "Ataques: ";
+
+        for (int i = 0; i < fighter.attacks.Length; i++)
+        {
+            if (i == fighter.attacks.Length - 1)
+            {
+                attack.text += fighter.attacks[i];
+            }
+            else
+            {
+                attack.text += fighter.attacks[i] + ", ";
+            }
+        }
+    }
+
     // Esta funcion agrega un solo luchador a la lista
     public void AppendWarrior(string warriorName)
     {
-        GameObject reference = (GameObject)Instantiate(Resources.Load("GameFighter"), heroesContainer.transform);
+        GameObject reference = (GameObject) Instantiate(Resources.Load("GameFighter"), heroesContainer.transform);
 
         Fighter fighter = Network.warriors[warriorName];
 
@@ -268,5 +307,7 @@ public class UIController : MonoBehaviour
                 attack.text += fighter.attacks[i] + ", ";
             }
         }
+
+        warriorData[warriorName] = reference;
     }
 }

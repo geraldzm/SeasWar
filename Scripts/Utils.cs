@@ -65,6 +65,10 @@ public class Utils
                 return IDMessage.NUMBERS;
             case "ATTACKLOG":
                 return IDMessage.ATTACKLOG;
+            case "LOOSER":
+                return IDMessage.LOOSER;
+            case "TURN":
+                return IDMessage.TURN;
             default:
                 return IDMessage.NONE;
         }
