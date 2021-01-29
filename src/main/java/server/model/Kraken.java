@@ -1,5 +1,9 @@
 package server.model;
+import server.comunication.Message;
+
 import java.util.*;
+
+import static server.comunication.IDMessage.ATTACKLOG;
 
 public class Kraken extends Attack {
 
@@ -34,11 +38,16 @@ public class Kraken extends Attack {
     private void IfTrident(Box box, Coordinate coordinate) {
 
         if(box.getOwner().getAttacks().stream().noneMatch(attack -> attack instanceof Trident)){ // si el enemigo tiene un tridente
-            box.setPercentage((byte) 0);
+
+            if(box.setPercentage((byte) 0)){ // if owner die
+                deadChampion(getAttacker(), box.getOwner());
+            }
+
         }else {
             tridentBoxes.add(coordinate);
         }
     }
+
 
     @Override
     void secondAttack(Village village, String[] command) {
@@ -104,8 +113,14 @@ public class Kraken extends Attack {
 
         // enviamos las casilla que se le retornan
         tridentBoxes.forEach(coordinate -> {
-            owner.getVillage()
-                    .getMatrix()[coordinate.row][coordinate.column].setPercentage((byte) 0); // kill box
+            Box box = owner.getVillage().getMatrix()[coordinate.row][coordinate.column];
+
+            getAttackLogMessages().add(new Message(
+                    box.getOwner().getName() + " devuelve el ataque del kraken con el tridente en  (" + coordinate.row+ ", "+ coordinate.column +")" , ATTACKLOG));
+
+            if(box.setPercentage((byte) 0)) {
+                deadChampion(box.getOwner(), getAttacker());
+            }
         });
 
         tridentBoxes.clear();

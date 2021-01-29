@@ -183,6 +183,21 @@ public class Server extends RunnableThread implements Listener {
                     turnLocker.notify();
                 }
             }
+            case GETSTATEBOX -> {
+                Player player = playersByID.get(message.getId());
+                Coordinate coordinate = new Coordinate(Integer.parseInt(message.getTexts()[1]), Integer.parseInt(message.getTexts()[2]));
+                Box box = player.getVillage().getMatrix()[coordinate.row][coordinate.column];
+                player.sendChatMessage("El estado de la coordenada (" + coordinate.row+ ", " + coordinate.column+") es: " + box.getPercentage()+ "%");
+            }
+            case GETSTATEENEMY -> {
+                Player player = playersByID.get(message.getId());
+                Player enemy = getByName(message.getTexts()[1]);
+
+                int alive = enemy.getChampions().stream().mapToInt(champion -> champion.getAmountBoxes() - champion.getAmountBoxesDead()).sum();
+                int dead = enemy.getChampions().stream().mapToInt(Champion::getAmountBoxesDead).sum();
+
+                player.sendChatMessage("El estado del enemigo " +enemy.getName()+ ": " + alive + " casillas vivas y "+ dead + " muertas");
+            }
             case ATTACK -> {
 
                 // attack <championName> <nombre> tentacle <col> <row> <col> <row> <col> <row>
@@ -208,8 +223,14 @@ public class Server extends RunnableThread implements Listener {
                     break;
                 }
 
-                for(Attack attack : champion.get().getAttacks()){
-                    if(attack.attackWith(texts[3], texts, toAttackPlayer.getVillage())){
+                for(Attack attack : champion.get().getAttacks()) {
+                    if(attack.attackWith(texts[3], texts, toAttackPlayer.getVillage(), champion.get())) {
+
+                        //send attacks messages to all
+                        System.out.println("\n\n\n\n\n\n\nse ataco "+ attack.getAttackLogMessages().size());
+                        attack.getAttackLogMessages().forEach(message1 -> players.forEach(player -> player.sendMessage(message1)));
+                        attack.getAttackLogMessages().clear();
+
                         //successful attack
                         synchronized (turnLocker) {
                             turnLocker.notify();
@@ -227,8 +248,8 @@ public class Server extends RunnableThread implements Listener {
         return playersByName.get(name);
     }
 
-    public static void printMatrix(Box[][] matrix){
 
+    public static void printMatrix(Box[][] matrix){
         Hashtable<String, AtomicInteger> count = new Hashtable<>();
 
         for (int row = 0; row < 20; row++) {

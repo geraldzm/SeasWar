@@ -23,5 +23,9 @@ public enum IDMessage {
     GARBAGE,
     WAVES,
     NUMBERS,
-    ATTACK;
+    ATTACK,
+    ATTACKLOG,
+    GETSTATEBOX,
+    GETSTATEENEMY,
+    LOOSER;
 }

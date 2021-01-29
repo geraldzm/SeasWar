@@ -14,7 +14,7 @@ public class Village {
 
     private Box [][] matrix;
     private Random random;
-    private static final int ROWS = 20, COLUMNS = 30;
+    public static final int ROWS = 20, COLUMNS = 30;
 
     public Village() {
         this.matrix = new Box[ROWS][COLUMNS]; // row column
